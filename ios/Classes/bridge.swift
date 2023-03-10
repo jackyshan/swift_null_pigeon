@@ -36,6 +36,18 @@ enum ResponseCode: Int {
   case fail = 1
 }
 
+enum ConnectStatus: Int {
+  case connecting = 0
+  case connected = 1
+  case disconnect = 2
+}
+
+enum TopicResultStatus: Int {
+  case invalid = 0
+  case processing = 1
+  case available = 2
+}
+
 /// Generated class from Pigeon that represents data sent in messages.
 struct RequestParam {
   var key: String
@@ -200,18 +212,33 @@ struct PushConfig {
 
 ///
 /// 连接信息
-/// */
+/// 
 ///
 /// Generated class from Pigeon that represents data sent in messages.
-struct ConnInfo {
+struct ConnectInfo {
+  var errorCode: Int32
+  var errorMessage: String? = nil
+  var connStatus: ConnectStatus? = nil
 
-  static func fromList(_ list: [Any]) -> ConnInfo? {
+  static func fromList(_ list: [Any]) -> ConnectInfo? {
+    let errorCode = list[0] as! Int32
+    let errorMessage = list[1] as! String? 
+    var connStatus: ConnectStatus? = nil
+    if let connStatusRawValue = list[2] as! Int? {
+      connStatus = ConnectStatus(rawValue: connStatusRawValue)
+    }
 
-    return ConnInfo(
+    return ConnectInfo(
+      errorCode: errorCode,
+      errorMessage: errorMessage,
+      connStatus: connStatus
     )
   }
   func toList() -> [Any?] {
     return [
+      errorCode,
+      errorMessage,
+      connStatus?.rawValue,
     ]
   }
 }
@@ -219,11 +246,11 @@ struct ConnInfo {
 /// Generated class from Pigeon that represents data sent in messages.
 struct ConnStatusObserverCallParam {
   var key: String
-  var data: ConnInfo
+  var data: ConnectInfo
 
   static func fromList(_ list: [Any]) -> ConnStatusObserverCallParam? {
     let key = list[0] as! String
-    let data = ConnInfo.fromList(list[1] as! [Any])!
+    let data = ConnectInfo.fromList(list[1] as! [Any])!
 
     return ConnStatusObserverCallParam(
       key: key,
@@ -238,20 +265,73 @@ struct ConnStatusObserverCallParam {
   }
 }
 
-///
-/// 推送消息
-/// */
-///
 /// Generated class from Pigeon that represents data sent in messages.
-struct PushData {
+struct TransferData {
+  var seq: String? = nil
+  var payloadId: String? = nil
+  var payload: String? = nil
+  var timestamp: Int32
+  var deviceId: String? = nil
+  var alias: String? = nil
+  var topic: String? = nil
 
-  static func fromList(_ list: [Any]) -> PushData? {
+  static func fromList(_ list: [Any]) -> TransferData? {
+    let seq = list[0] as! String? 
+    let payloadId = list[1] as! String? 
+    let payload = list[2] as! String? 
+    let timestamp = list[3] as! Int32
+    let deviceId = list[4] as! String? 
+    let alias = list[5] as! String? 
+    let topic = list[6] as! String? 
 
-    return PushData(
+    return TransferData(
+      seq: seq,
+      payloadId: payloadId,
+      payload: payload,
+      timestamp: timestamp,
+      deviceId: deviceId,
+      alias: alias,
+      topic: topic
     )
   }
   func toList() -> [Any?] {
     return [
+      seq,
+      payloadId,
+      payload,
+      timestamp,
+      deviceId,
+      alias,
+      topic,
+    ]
+  }
+}
+
+///
+/// 推送消息
+/// 
+///
+/// Generated class from Pigeon that represents data sent in messages.
+struct PushMessageData {
+  var type: String? = nil
+  var data: TransferData? = nil
+
+  static func fromList(_ list: [Any]) -> PushMessageData? {
+    let type = list[0] as! String? 
+    var data: TransferData? = nil
+    if let dataList = list[1] as! [Any]? {
+      data = TransferData.fromList(dataList as [Any])
+    }
+
+    return PushMessageData(
+      type: type,
+      data: data
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      type,
+      data?.toList(),
     ]
   }
 }
@@ -259,11 +339,11 @@ struct PushData {
 /// Generated class from Pigeon that represents data sent in messages.
 struct PushObserverCallParam {
   var key: String
-  var data: PushData
+  var data: PushMessageData
 
   static func fromList(_ list: [Any]) -> PushObserverCallParam? {
     let key = list[0] as! String
-    let data = PushData.fromList(list[1] as! [Any])!
+    let data = PushMessageData.fromList(list[1] as! [Any])!
 
     return PushObserverCallParam(
       key: key,
@@ -280,32 +360,44 @@ struct PushObserverCallParam {
 
 ///
 /// 订阅结果
-/// */
+/// 
 ///
 /// Generated class from Pigeon that represents data sent in messages.
-struct SubscribeResult {
+struct TopicSubscribeResult {
+  var status: TopicResultStatus
+  var code: Int32
+  var msg: String? = nil
 
-  static func fromList(_ list: [Any]) -> SubscribeResult? {
+  static func fromList(_ list: [Any]) -> TopicSubscribeResult? {
+    let status = TopicResultStatus(rawValue: list[0] as! Int)!
+    let code = list[1] as! Int32
+    let msg = list[2] as! String? 
 
-    return SubscribeResult(
+    return TopicSubscribeResult(
+      status: status,
+      code: code,
+      msg: msg
     )
   }
   func toList() -> [Any?] {
     return [
+      status.rawValue,
+      code,
+      msg,
     ]
   }
 }
 
 /// Generated class from Pigeon that represents data sent in messages.
-struct TopicData {
+struct TopicSubscribeData {
   var topic: String
-  var result: SubscribeResult
+  var result: TopicSubscribeResult
 
-  static func fromList(_ list: [Any]) -> TopicData? {
+  static func fromList(_ list: [Any]) -> TopicSubscribeData? {
     let topic = list[0] as! String
-    let result = SubscribeResult.fromList(list[1] as! [Any])!
+    let result = TopicSubscribeResult.fromList(list[1] as! [Any])!
 
-    return TopicData(
+    return TopicSubscribeData(
       topic: topic,
       result: result
     )
@@ -321,11 +413,11 @@ struct TopicData {
 /// Generated class from Pigeon that represents data sent in messages.
 struct TopicObserverCallParam {
   var key: String
-  var data: TopicData
+  var data: TopicSubscribeData
 
   static func fromList(_ list: [Any]) -> TopicObserverCallParam? {
     let key = list[0] as! String
-    let data = TopicData.fromList(list[1] as! [Any])!
+    let data = TopicSubscribeData.fromList(list[1] as! [Any])!
 
     return TopicObserverCallParam(
       key: key,
@@ -410,51 +502,51 @@ class NativePushBridgeCodec: FlutterStandardMessageCodec {
 protocol NativePushBridge {
   ///
   /// 连接
-  /// */
+  /// 
   func connect(param: InitRequestParam, completion: @escaping (Result<ResponseParam, Error>) -> Void)
   ///
   /// 断开连接
-  /// */
+  /// 
   func disconnect() throws -> ResponseParam
   ///
   /// 添加连接状态监听
-  /// */
+  /// 
   func addConnStatusObserver(param: ObserverRequestParam) throws -> ResponseParam
   ///
   /// 移除连接状态监听
-  /// */
+  /// 
   func removeConnStatusObserver(param: ObserverRequestParam) throws -> ResponseParam
   ///
   /// 添加推送消息监听
-  /// */
+  /// 
   func addPushObserver(param: ObserverRequestParam) throws -> ResponseParam
   ///
   /// 移除连接状态监听
-  /// */
+  /// 
   func removePushObserver(param: ObserverRequestParam) throws -> ResponseParam
   ///
   /// 设置别名
-  /// */
+  /// 
   func setAlias(param: SetAliasRequestParam, completion: @escaping (Result<ResponseParam, Error>) -> Void)
   ///
   /// 清除别名
-  /// */
+  /// 
   func clearAlias(completion: @escaping (Result<ResponseParam, Error>) -> Void)
   ///
   /// 订阅主题
-  /// */
+  /// 
   func subscribeTopic(param: RequestParam) throws -> ResponseParam
   ///
   /// 取消订阅主题
-  /// */
+  /// 
   func unsubscribeTopic(param: RequestParam) throws -> ResponseParam
   ///
   /// 添加主题订阅监听
-  /// */
+  /// 
   func addTopicsObserver(param: ObserverRequestParam) throws -> ResponseParam
   ///
   /// 移除主题订阅监听
-  /// */
+  /// 
   func removeTopicsObserver(param: ObserverRequestParam) throws -> ResponseParam
 }
 
@@ -466,7 +558,7 @@ class NativePushBridgeSetup {
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: NativePushBridge?) {
     ///
     /// 连接
-    /// */
+    /// 
     let connectChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.connect", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       connectChannel.setMessageHandler { message, reply in
@@ -486,7 +578,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 断开连接
-    /// */
+    /// 
     let disconnectChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.disconnect", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       disconnectChannel.setMessageHandler { _, reply in
@@ -502,7 +594,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 添加连接状态监听
-    /// */
+    /// 
     let addConnStatusObserverChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.addConnStatusObserver", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       addConnStatusObserverChannel.setMessageHandler { message, reply in
@@ -520,7 +612,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 移除连接状态监听
-    /// */
+    /// 
     let removeConnStatusObserverChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.removeConnStatusObserver", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       removeConnStatusObserverChannel.setMessageHandler { message, reply in
@@ -538,7 +630,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 添加推送消息监听
-    /// */
+    /// 
     let addPushObserverChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.addPushObserver", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       addPushObserverChannel.setMessageHandler { message, reply in
@@ -556,7 +648,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 移除连接状态监听
-    /// */
+    /// 
     let removePushObserverChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.removePushObserver", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       removePushObserverChannel.setMessageHandler { message, reply in
@@ -574,7 +666,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 设置别名
-    /// */
+    /// 
     let setAliasChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.setAlias", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setAliasChannel.setMessageHandler { message, reply in
@@ -594,7 +686,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 清除别名
-    /// */
+    /// 
     let clearAliasChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.clearAlias", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       clearAliasChannel.setMessageHandler { _, reply in
@@ -612,7 +704,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 订阅主题
-    /// */
+    /// 
     let subscribeTopicChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.subscribeTopic", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       subscribeTopicChannel.setMessageHandler { message, reply in
@@ -630,7 +722,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 取消订阅主题
-    /// */
+    /// 
     let unsubscribeTopicChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.unsubscribeTopic", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       unsubscribeTopicChannel.setMessageHandler { message, reply in
@@ -648,7 +740,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 添加主题订阅监听
-    /// */
+    /// 
     let addTopicsObserverChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.addTopicsObserver", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       addTopicsObserverChannel.setMessageHandler { message, reply in
@@ -666,7 +758,7 @@ class NativePushBridgeSetup {
     }
     ///
     /// 移除主题订阅监听
-    /// */
+    /// 
     let removeTopicsObserverChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.removeTopicsObserver", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       removeTopicsObserverChannel.setMessageHandler { message, reply in
@@ -688,21 +780,23 @@ private class FlutterPushBridgeCodecReader: FlutterStandardReader {
   override func readValue(ofType type: UInt8) -> Any? {
     switch type {
       case 128:
-        return ConnInfo.fromList(self.readValue() as! [Any])
-      case 129:
         return ConnStatusObserverCallParam.fromList(self.readValue() as! [Any])
+      case 129:
+        return ConnectInfo.fromList(self.readValue() as! [Any])
       case 130:
-        return PushData.fromList(self.readValue() as! [Any])
+        return PushMessageData.fromList(self.readValue() as! [Any])
       case 131:
         return PushObserverCallParam.fromList(self.readValue() as! [Any])
       case 132:
         return ResponseParam.fromList(self.readValue() as! [Any])
       case 133:
-        return SubscribeResult.fromList(self.readValue() as! [Any])
-      case 134:
-        return TopicData.fromList(self.readValue() as! [Any])
-      case 135:
         return TopicObserverCallParam.fromList(self.readValue() as! [Any])
+      case 134:
+        return TopicSubscribeData.fromList(self.readValue() as! [Any])
+      case 135:
+        return TopicSubscribeResult.fromList(self.readValue() as! [Any])
+      case 136:
+        return TransferData.fromList(self.readValue() as! [Any])
       default:
         return super.readValue(ofType: type)
     }
@@ -711,13 +805,13 @@ private class FlutterPushBridgeCodecReader: FlutterStandardReader {
 
 private class FlutterPushBridgeCodecWriter: FlutterStandardWriter {
   override func writeValue(_ value: Any) {
-    if let value = value as? ConnInfo {
+    if let value = value as? ConnStatusObserverCallParam {
       super.writeByte(128)
       super.writeValue(value.toList())
-    } else if let value = value as? ConnStatusObserverCallParam {
+    } else if let value = value as? ConnectInfo {
       super.writeByte(129)
       super.writeValue(value.toList())
-    } else if let value = value as? PushData {
+    } else if let value = value as? PushMessageData {
       super.writeByte(130)
       super.writeValue(value.toList())
     } else if let value = value as? PushObserverCallParam {
@@ -726,14 +820,17 @@ private class FlutterPushBridgeCodecWriter: FlutterStandardWriter {
     } else if let value = value as? ResponseParam {
       super.writeByte(132)
       super.writeValue(value.toList())
-    } else if let value = value as? SubscribeResult {
+    } else if let value = value as? TopicObserverCallParam {
       super.writeByte(133)
       super.writeValue(value.toList())
-    } else if let value = value as? TopicData {
+    } else if let value = value as? TopicSubscribeData {
       super.writeByte(134)
       super.writeValue(value.toList())
-    } else if let value = value as? TopicObserverCallParam {
+    } else if let value = value as? TopicSubscribeResult {
       super.writeByte(135)
+      super.writeValue(value.toList())
+    } else if let value = value as? TransferData {
+      super.writeByte(136)
       super.writeValue(value.toList())
     } else {
       super.writeValue(value)

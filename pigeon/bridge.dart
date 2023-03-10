@@ -61,107 +61,133 @@ abstract class NativePushBridge {
 
   ///
   /// 连接
-  /// */
+  /// 
   @async
   ResponseParam connect(InitRequestParam param);
 
   ///
   /// 断开连接
-  /// */
+  /// 
   ResponseParam disconnect();
 
   ///
   /// 添加连接状态监听
-  /// */
+  /// 
   ResponseParam addConnStatusObserver(ObserverRequestParam param);
 
   ///
   /// 移除连接状态监听
-  /// */
+  /// 
   ResponseParam removeConnStatusObserver(ObserverRequestParam param);
 
   ///
   /// 添加推送消息监听
-  /// */
+  /// 
   ResponseParam addPushObserver(ObserverRequestParam param);
 
   ///
   /// 移除连接状态监听
-  /// */
+  /// 
   ResponseParam removePushObserver(ObserverRequestParam param);
 
   ///
   /// 设置别名
-  /// */
+  /// 
   @async
   ResponseParam setAlias(SetAliasRequestParam param);
 
   ///
   /// 清除别名
-  /// */
+  /// 
   @async
   ResponseParam clearAlias();
 
   ///
   /// 订阅主题
-  /// */
+  /// 
   ResponseParam subscribeTopic(RequestParam param);
 
   ///
   /// 取消订阅主题
-  /// */
+  /// 
   ResponseParam unsubscribeTopic(RequestParam param);
 
   ///
   /// 添加主题订阅监听
-  /// */
+  /// 
   ResponseParam addTopicsObserver(ObserverRequestParam param);
 
   ///
   /// 移除主题订阅监听
-  /// */
+  /// 
   ResponseParam removeTopicsObserver(ObserverRequestParam param);
 }
 
+
+enum ConnectStatus {
+  connecting,  //连接中 1
+  connected,  //连接成功 2
+  disconnect //连接断开 3
+}
 ///
 /// 连接信息
-/// */
-class ConnInfo {
-  //todo
+/// 
+class ConnectInfo {
+  late int errorCode;
+  String? errorMessage;
+  ConnectStatus? connStatus;
 }
 
 class ConnStatusObserverCallParam {
   late String key;
-  late ConnInfo data;
+  late ConnectInfo data;
 }
 
+class TransferData {
+  String? seq;
+  String? payloadId;
+  String? payload;
+  late int timestamp; //后段发送来的时间搓
+  String? deviceId;
+  String? alias;
+  String? topic;
+}
 ///
 /// 推送消息
-/// */
-class PushData {
-  //todo
+/// 
+class PushMessageData {
+  String? type;
+  TransferData? data;
 }
 
 class PushObserverCallParam {
   late String key;
-  late PushData data;
+  late PushMessageData data;
 }
 
+
+enum TopicResultStatus {
+  invalid,
+  processing,
+  available;
+}
 ///
 /// 订阅结果
-/// */
-class SubscribeResult {
-  //todo
+/// 
+class TopicSubscribeResult {
+  late TopicResultStatus status;
+  late int code;
+  String? msg;
 }
 
-class TopicData {
+class TopicSubscribeData {
   late String topic;
-  late SubscribeResult result;
+  late TopicSubscribeResult result;
 }
 
 class TopicObserverCallParam {
   late String key;
-  late TopicData data;
+  late TopicSubscribeData data;
 }
 
 @FlutterApi()

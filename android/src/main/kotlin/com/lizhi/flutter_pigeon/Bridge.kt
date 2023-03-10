@@ -34,6 +34,30 @@ enum class ResponseCode(val raw: Int) {
   }
 }
 
+enum class ConnectStatus(val raw: Int) {
+  CONNECTING(0),
+  CONNECTED(1),
+  DISCONNECT(2);
+
+  companion object {
+    fun ofRaw(raw: Int): ConnectStatus? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class TopicResultStatus(val raw: Int) {
+  INVALID(0),
+  PROCESSING(1),
+  AVAILABLE(2);
+
+  companion object {
+    fun ofRaw(raw: Int): TopicResultStatus? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class RequestParam (
   val key: String,
@@ -197,21 +221,32 @@ data class PushConfig (
 /**
  *
  * 连接信息
- * */
+ * 
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
-data class ConnInfo (
+data class ConnectInfo (
+  val errorCode: Long,
+  val errorMessage: String? = null,
+  val connStatus: ConnectStatus? = null
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
-    fun fromList(list: List<Any?>): ConnInfo {
-      return ConnInfo()
+    fun fromList(list: List<Any?>): ConnectInfo {
+      val errorCode = list[0].let { if (it is Int) it.toLong() else it as Long }
+      val errorMessage = list[1] as String?
+      val connStatus: ConnectStatus? = (list[2] as Int?)?.let {
+        ConnectStatus.ofRaw(it)
+      }
+      return ConnectInfo(errorCode, errorMessage, connStatus)
     }
   }
   fun toList(): List<Any?> {
     return listOf<Any?>(
+      errorCode,
+      errorMessage,
+      connStatus?.raw,
     )
   }
 }
@@ -219,14 +254,14 @@ data class ConnInfo (
 /** Generated class from Pigeon that represents data sent in messages. */
 data class ConnStatusObserverCallParam (
   val key: String,
-  val data: ConnInfo
+  val data: ConnectInfo
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): ConnStatusObserverCallParam {
       val key = list[0] as String
-      val data = ConnInfo.fromList(list[1] as List<Any?>)
+      val data = ConnectInfo.fromList(list[1] as List<Any?>)
       return ConnStatusObserverCallParam(key, data)
     }
   }
@@ -238,24 +273,69 @@ data class ConnStatusObserverCallParam (
   }
 }
 
-/**
- *
- * 推送消息
- * */
- *
- * Generated class from Pigeon that represents data sent in messages.
- */
-data class PushData (
+/** Generated class from Pigeon that represents data sent in messages. */
+data class TransferData (
+  val seq: String? = null,
+  val payloadId: String? = null,
+  val payload: String? = null,
+  val timestamp: Long,
+  val deviceId: String? = null,
+  val alias: String? = null,
+  val topic: String? = null
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
-    fun fromList(list: List<Any?>): PushData {
-      return PushData()
+    fun fromList(list: List<Any?>): TransferData {
+      val seq = list[0] as String?
+      val payloadId = list[1] as String?
+      val payload = list[2] as String?
+      val timestamp = list[3].let { if (it is Int) it.toLong() else it as Long }
+      val deviceId = list[4] as String?
+      val alias = list[5] as String?
+      val topic = list[6] as String?
+      return TransferData(seq, payloadId, payload, timestamp, deviceId, alias, topic)
     }
   }
   fun toList(): List<Any?> {
     return listOf<Any?>(
+      seq,
+      payloadId,
+      payload,
+      timestamp,
+      deviceId,
+      alias,
+      topic,
+    )
+  }
+}
+
+/**
+ *
+ * 推送消息
+ * 
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PushMessageData (
+  val type: String? = null,
+  val data: TransferData? = null
+
+) {
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    fun fromList(list: List<Any?>): PushMessageData {
+      val type = list[0] as String?
+      val data: TransferData? = (list[1] as List<Any?>?)?.let {
+        TransferData.fromList(it)
+      }
+      return PushMessageData(type, data)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf<Any?>(
+      type,
+      data?.toList(),
     )
   }
 }
@@ -263,14 +343,14 @@ data class PushData (
 /** Generated class from Pigeon that represents data sent in messages. */
 data class PushObserverCallParam (
   val key: String,
-  val data: PushData
+  val data: PushMessageData
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): PushObserverCallParam {
       val key = list[0] as String
-      val data = PushData.fromList(list[1] as List<Any?>)
+      val data = PushMessageData.fromList(list[1] as List<Any?>)
       return PushObserverCallParam(key, data)
     }
   }
@@ -285,37 +365,46 @@ data class PushObserverCallParam (
 /**
  *
  * 订阅结果
- * */
+ * 
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
-data class SubscribeResult (
+data class TopicSubscribeResult (
+  val status: TopicResultStatus,
+  val code: Long,
+  val msg: String? = null
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
-    fun fromList(list: List<Any?>): SubscribeResult {
-      return SubscribeResult()
+    fun fromList(list: List<Any?>): TopicSubscribeResult {
+      val status = TopicResultStatus.ofRaw(list[0] as Int)!!
+      val code = list[1].let { if (it is Int) it.toLong() else it as Long }
+      val msg = list[2] as String?
+      return TopicSubscribeResult(status, code, msg)
     }
   }
   fun toList(): List<Any?> {
     return listOf<Any?>(
+      status.raw,
+      code,
+      msg,
     )
   }
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
-data class TopicData (
+data class TopicSubscribeData (
   val topic: String,
-  val result: SubscribeResult
+  val result: TopicSubscribeResult
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
-    fun fromList(list: List<Any?>): TopicData {
+    fun fromList(list: List<Any?>): TopicSubscribeData {
       val topic = list[0] as String
-      val result = SubscribeResult.fromList(list[1] as List<Any?>)
-      return TopicData(topic, result)
+      val result = TopicSubscribeResult.fromList(list[1] as List<Any?>)
+      return TopicSubscribeData(topic, result)
     }
   }
   fun toList(): List<Any?> {
@@ -329,14 +418,14 @@ data class TopicData (
 /** Generated class from Pigeon that represents data sent in messages. */
 data class TopicObserverCallParam (
   val key: String,
-  val data: TopicData
+  val data: TopicSubscribeData
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): TopicObserverCallParam {
       val key = list[0] as String
-      val data = TopicData.fromList(list[1] as List<Any?>)
+      val data = TopicSubscribeData.fromList(list[1] as List<Any?>)
       return TopicObserverCallParam(key, data)
     }
   }
@@ -430,73 +519,73 @@ interface NativePushBridge {
   /**
    *
    * 连接
-   * */
+   * 
    */
   fun connect(param: InitRequestParam, callback: (Result<ResponseParam>) -> Unit)
   /**
    *
    * 断开连接
-   * */
+   * 
    */
   fun disconnect(): ResponseParam
   /**
    *
    * 添加连接状态监听
-   * */
+   * 
    */
   fun addConnStatusObserver(param: ObserverRequestParam): ResponseParam
   /**
    *
    * 移除连接状态监听
-   * */
+   * 
    */
   fun removeConnStatusObserver(param: ObserverRequestParam): ResponseParam
   /**
    *
    * 添加推送消息监听
-   * */
+   * 
    */
   fun addPushObserver(param: ObserverRequestParam): ResponseParam
   /**
    *
    * 移除连接状态监听
-   * */
+   * 
    */
   fun removePushObserver(param: ObserverRequestParam): ResponseParam
   /**
    *
    * 设置别名
-   * */
+   * 
    */
   fun setAlias(param: SetAliasRequestParam, callback: (Result<ResponseParam>) -> Unit)
   /**
    *
    * 清除别名
-   * */
+   * 
    */
   fun clearAlias(callback: (Result<ResponseParam>) -> Unit)
   /**
    *
    * 订阅主题
-   * */
+   * 
    */
   fun subscribeTopic(param: RequestParam): ResponseParam
   /**
    *
    * 取消订阅主题
-   * */
+   * 
    */
   fun unsubscribeTopic(param: RequestParam): ResponseParam
   /**
    *
    * 添加主题订阅监听
-   * */
+   * 
    */
   fun addTopicsObserver(param: ObserverRequestParam): ResponseParam
   /**
    *
    * 移除主题订阅监听
-   * */
+   * 
    */
   fun removeTopicsObserver(param: ObserverRequestParam): ResponseParam
 
@@ -735,17 +824,17 @@ private object FlutterPushBridgeCodec : StandardMessageCodec() {
     return when (type) {
       128.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConnInfo.fromList(it)
+          ConnStatusObserverCallParam.fromList(it)
         }
       }
       129.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConnStatusObserverCallParam.fromList(it)
+          ConnectInfo.fromList(it)
         }
       }
       130.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PushData.fromList(it)
+          PushMessageData.fromList(it)
         }
       }
       131.toByte() -> {
@@ -760,17 +849,22 @@ private object FlutterPushBridgeCodec : StandardMessageCodec() {
       }
       133.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SubscribeResult.fromList(it)
+          TopicObserverCallParam.fromList(it)
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopicData.fromList(it)
+          TopicSubscribeData.fromList(it)
         }
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopicObserverCallParam.fromList(it)
+          TopicSubscribeResult.fromList(it)
+        }
+      }
+      136.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TransferData.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -778,15 +872,15 @@ private object FlutterPushBridgeCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is ConnInfo -> {
+      is ConnStatusObserverCallParam -> {
         stream.write(128)
         writeValue(stream, value.toList())
       }
-      is ConnStatusObserverCallParam -> {
+      is ConnectInfo -> {
         stream.write(129)
         writeValue(stream, value.toList())
       }
-      is PushData -> {
+      is PushMessageData -> {
         stream.write(130)
         writeValue(stream, value.toList())
       }
@@ -798,16 +892,20 @@ private object FlutterPushBridgeCodec : StandardMessageCodec() {
         stream.write(132)
         writeValue(stream, value.toList())
       }
-      is SubscribeResult -> {
+      is TopicObserverCallParam -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is TopicData -> {
+      is TopicSubscribeData -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is TopicObserverCallParam -> {
+      is TopicSubscribeResult -> {
         stream.write(135)
+        writeValue(stream, value.toList())
+      }
+      is TransferData -> {
+        stream.write(136)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

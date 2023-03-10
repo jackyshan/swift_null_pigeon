@@ -90,7 +90,8 @@ android {
 }
 
 dependencies {
-    implementation 'com.lizhi.component.lib:itnet-lib:4.7.0'
-    debugImplementation 'com.lizhi.component.lib:itnet-lib:4.7.0'
-    debugImplementation 'com.lizhi.component.lib:itnet-push-lib:5.4.1'
+//    implementation 'com.lizhi.component.lib:itnet-lib:4.7.0'
+//    debugImplementation 'com.lizhi.component.lib:itnet-lib:4.7.0'
+    implementation 'com.lizhi.component.lib:itnet-push-lib:5.4.1'
+//    implementation 'com.yibasan.lizhifm.sdk.platformtools:lzplatformtools-lib:2.9.17@aar'
 }

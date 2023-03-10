@@ -11,7 +11,7 @@ class PushManager {
   late final MethodChannel _methodChannel;
   late final NativePushBridge _nativePushBridge;
 
-  PushManager._() {
+  PushManager() {
     _methodChannel = const MethodChannel('push_lzflutter');
     _nativePushBridge = NativePushBridge(binaryMessenger: _methodChannel.binaryMessenger);
     FlutterPushBridge.setup(FlutterPushBridgeImpl(pushManager: this), binaryMessenger: _methodChannel.binaryMessenger);
@@ -23,15 +23,15 @@ class PushManager {
   Map<String, PushObserver> pushObservers = {};
   Map<String, ConnectStatusObserver> connObservers = {};
 
-  void callConnStatusObserver(String key, ConnInfo connInfo) {
+  void callConnStatusObserver(String key, ConnectInfo connInfo) {
     connObservers[key]?.onConnectStatusChanged(connInfo);
   }
 
-  void callPushObserver(String key, PushData pushData) {
+  void callPushObserver(String key, PushMessageData pushData) {
     pushObservers[key]?.onPush(pushData);
   }
 
-  void callTopicObserverCall(String key, TopicData topicData) {
+  void callTopicObserverCall(String key, TopicSubscribeData topicData) {
     topicObservers[key]?.onSubscribe(topicData.topic, topicData.result);
   }
 

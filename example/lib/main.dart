@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:push_lzflutter/bridge.dart';
 import 'package:push_lzflutter/push_lzflutter.dart';
 
 void main() {
@@ -23,6 +24,12 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
+
+    _pushLzflutterPlugin.getPushManager().connect(PushConfig(
+        hostApp: "saya",
+        appId: "22631490",
+        deviceId: "N_399daa7b0ccd5d9a",
+        defaultHosts: ['ws://172.17.32.53:39999/push']));
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -31,8 +38,8 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _pushLzflutterPlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _pushLzflutterPlugin.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }

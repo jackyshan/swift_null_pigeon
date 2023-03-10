@@ -13,6 +13,18 @@ enum ResponseCode {
   fail,
 }
 
+enum ConnectStatus {
+  connecting,
+  connected,
+  disconnect,
+}
+
+enum TopicResultStatus {
+  invalid,
+  processing,
+  available,
+}
+
 class RequestParam {
   RequestParam({
     required this.key,
@@ -207,19 +219,36 @@ class PushConfig {
 
 ///
 /// 连接信息
-/// */
-class ConnInfo {
-  ConnInfo({
+/// 
+class ConnectInfo {
+  ConnectInfo({
+    required this.errorCode,
+    this.errorMessage,
+    this.connStatus,
   });
+
+  int errorCode;
+
+  String? errorMessage;
+
+  ConnectStatus? connStatus;
 
   Object encode() {
     return <Object?>[
+      errorCode,
+      errorMessage,
+      connStatus?.index,
     ];
   }
 
-  static ConnInfo decode(Object result) {
+  static ConnectInfo decode(Object result) {
     result as List<Object?>;
-    return ConnInfo(
+    return ConnectInfo(
+      errorCode: result[0]! as int,
+      errorMessage: result[1] as String?,
+      connStatus: result[2] != null
+          ? ConnectStatus.values[result[2]! as int]
+          : null,
     );
   }
 }
@@ -232,7 +261,7 @@ class ConnStatusObserverCallParam {
 
   String key;
 
-  ConnInfo data;
+  ConnectInfo data;
 
   Object encode() {
     return <Object?>[
@@ -245,26 +274,89 @@ class ConnStatusObserverCallParam {
     result as List<Object?>;
     return ConnStatusObserverCallParam(
       key: result[0]! as String,
-      data: ConnInfo.decode(result[1]! as List<Object?>),
+      data: ConnectInfo.decode(result[1]! as List<Object?>),
+    );
+  }
+}
+
+class TransferData {
+  TransferData({
+    this.seq,
+    this.payloadId,
+    this.payload,
+    required this.timestamp,
+    this.deviceId,
+    this.alias,
+    this.topic,
+  });
+
+  String? seq;
+
+  String? payloadId;
+
+  String? payload;
+
+  int timestamp;
+
+  String? deviceId;
+
+  String? alias;
+
+  String? topic;
+
+  Object encode() {
+    return <Object?>[
+      seq,
+      payloadId,
+      payload,
+      timestamp,
+      deviceId,
+      alias,
+      topic,
+    ];
+  }
+
+  static TransferData decode(Object result) {
+    result as List<Object?>;
+    return TransferData(
+      seq: result[0] as String?,
+      payloadId: result[1] as String?,
+      payload: result[2] as String?,
+      timestamp: result[3]! as int,
+      deviceId: result[4] as String?,
+      alias: result[5] as String?,
+      topic: result[6] as String?,
     );
   }
 }
 
 ///
 /// 推送消息
-/// */
-class PushData {
-  PushData({
+/// 
+class PushMessageData {
+  PushMessageData({
+    this.type,
+    this.data,
   });
+
+  String? type;
+
+  TransferData? data;
 
   Object encode() {
     return <Object?>[
+      type,
+      data?.encode(),
     ];
   }
 
-  static PushData decode(Object result) {
+  static PushMessageData decode(Object result) {
     result as List<Object?>;
-    return PushData(
+    return PushMessageData(
+      type: result[0] as String?,
+      data: result[1] != null
+          ? TransferData.decode(result[1]! as List<Object?>)
+          : null,
     );
   }
 }
@@ -277,7 +369,7 @@ class PushObserverCallParam {
 
   String key;
 
-  PushData data;
+  PushMessageData data;
 
   Object encode() {
     return <Object?>[
@@ -290,39 +382,54 @@ class PushObserverCallParam {
     result as List<Object?>;
     return PushObserverCallParam(
       key: result[0]! as String,
-      data: PushData.decode(result[1]! as List<Object?>),
+      data: PushMessageData.decode(result[1]! as List<Object?>),
     );
   }
 }
 
 ///
 /// 订阅结果
-/// */
-class SubscribeResult {
-  SubscribeResult({
+/// 
+class TopicSubscribeResult {
+  TopicSubscribeResult({
+    required this.status,
+    required this.code,
+    this.msg,
   });
+
+  TopicResultStatus status;
+
+  int code;
+
+  String? msg;
 
   Object encode() {
     return <Object?>[
+      status.index,
+      code,
+      msg,
     ];
   }
 
-  static SubscribeResult decode(Object result) {
+  static TopicSubscribeResult decode(Object result) {
     result as List<Object?>;
-    return SubscribeResult(
+    return TopicSubscribeResult(
+      status: TopicResultStatus.values[result[0]! as int],
+      code: result[1]! as int,
+      msg: result[2] as String?,
     );
   }
 }
 
-class TopicData {
-  TopicData({
+class TopicSubscribeData {
+  TopicSubscribeData({
     required this.topic,
     required this.result,
   });
 
   String topic;
 
-  SubscribeResult result;
+  TopicSubscribeResult result;
 
   Object encode() {
     return <Object?>[
@@ -331,11 +438,11 @@ class TopicData {
     ];
   }
 
-  static TopicData decode(Object result) {
+  static TopicSubscribeData decode(Object result) {
     result as List<Object?>;
-    return TopicData(
+    return TopicSubscribeData(
       topic: result[0]! as String,
-      result: SubscribeResult.decode(result[1]! as List<Object?>),
+      result: TopicSubscribeResult.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -348,7 +455,7 @@ class TopicObserverCallParam {
 
   String key;
 
-  TopicData data;
+  TopicSubscribeData data;
 
   Object encode() {
     return <Object?>[
@@ -361,7 +468,7 @@ class TopicObserverCallParam {
     result as List<Object?>;
     return TopicObserverCallParam(
       key: result[0]! as String,
-      data: TopicData.decode(result[1]! as List<Object?>),
+      data: TopicSubscribeData.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -431,7 +538,7 @@ class NativePushBridge {
 
   ///
   /// 连接
-  /// */
+  /// 
   Future<ResponseParam> connect(InitRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.connect', codec,
@@ -461,7 +568,7 @@ class NativePushBridge {
 
   ///
   /// 断开连接
-  /// */
+  /// 
   Future<ResponseParam> disconnect() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.disconnect', codec,
@@ -491,7 +598,7 @@ class NativePushBridge {
 
   ///
   /// 添加连接状态监听
-  /// */
+  /// 
   Future<ResponseParam> addConnStatusObserver(ObserverRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.addConnStatusObserver', codec,
@@ -521,7 +628,7 @@ class NativePushBridge {
 
   ///
   /// 移除连接状态监听
-  /// */
+  /// 
   Future<ResponseParam> removeConnStatusObserver(ObserverRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.removeConnStatusObserver', codec,
@@ -551,7 +658,7 @@ class NativePushBridge {
 
   ///
   /// 添加推送消息监听
-  /// */
+  /// 
   Future<ResponseParam> addPushObserver(ObserverRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.addPushObserver', codec,
@@ -581,7 +688,7 @@ class NativePushBridge {
 
   ///
   /// 移除连接状态监听
-  /// */
+  /// 
   Future<ResponseParam> removePushObserver(ObserverRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.removePushObserver', codec,
@@ -611,7 +718,7 @@ class NativePushBridge {
 
   ///
   /// 设置别名
-  /// */
+  /// 
   Future<ResponseParam> setAlias(SetAliasRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.setAlias', codec,
@@ -641,7 +748,7 @@ class NativePushBridge {
 
   ///
   /// 清除别名
-  /// */
+  /// 
   Future<ResponseParam> clearAlias() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.clearAlias', codec,
@@ -671,7 +778,7 @@ class NativePushBridge {
 
   ///
   /// 订阅主题
-  /// */
+  /// 
   Future<ResponseParam> subscribeTopic(RequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.subscribeTopic', codec,
@@ -701,7 +808,7 @@ class NativePushBridge {
 
   ///
   /// 取消订阅主题
-  /// */
+  /// 
   Future<ResponseParam> unsubscribeTopic(RequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.unsubscribeTopic', codec,
@@ -731,7 +838,7 @@ class NativePushBridge {
 
   ///
   /// 添加主题订阅监听
-  /// */
+  /// 
   Future<ResponseParam> addTopicsObserver(ObserverRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.addTopicsObserver', codec,
@@ -761,7 +868,7 @@ class NativePushBridge {
 
   ///
   /// 移除主题订阅监听
-  /// */
+  /// 
   Future<ResponseParam> removeTopicsObserver(ObserverRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.removeTopicsObserver', codec,
@@ -794,13 +901,13 @@ class _FlutterPushBridgeCodec extends StandardMessageCodec {
   const _FlutterPushBridgeCodec();
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is ConnInfo) {
+    if (value is ConnStatusObserverCallParam) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is ConnStatusObserverCallParam) {
+    } else if (value is ConnectInfo) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is PushData) {
+    } else if (value is PushMessageData) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
     } else if (value is PushObserverCallParam) {
@@ -809,14 +916,17 @@ class _FlutterPushBridgeCodec extends StandardMessageCodec {
     } else if (value is ResponseParam) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is SubscribeResult) {
+    } else if (value is TopicObserverCallParam) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is TopicData) {
+    } else if (value is TopicSubscribeData) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is TopicObserverCallParam) {
+    } else if (value is TopicSubscribeResult) {
       buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is TransferData) {
+      buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -827,21 +937,23 @@ class _FlutterPushBridgeCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 128: 
-        return ConnInfo.decode(readValue(buffer)!);
-      case 129: 
         return ConnStatusObserverCallParam.decode(readValue(buffer)!);
+      case 129: 
+        return ConnectInfo.decode(readValue(buffer)!);
       case 130: 
-        return PushData.decode(readValue(buffer)!);
+        return PushMessageData.decode(readValue(buffer)!);
       case 131: 
         return PushObserverCallParam.decode(readValue(buffer)!);
       case 132: 
         return ResponseParam.decode(readValue(buffer)!);
       case 133: 
-        return SubscribeResult.decode(readValue(buffer)!);
-      case 134: 
-        return TopicData.decode(readValue(buffer)!);
-      case 135: 
         return TopicObserverCallParam.decode(readValue(buffer)!);
+      case 134: 
+        return TopicSubscribeData.decode(readValue(buffer)!);
+      case 135: 
+        return TopicSubscribeResult.decode(readValue(buffer)!);
+      case 136: 
+        return TransferData.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }

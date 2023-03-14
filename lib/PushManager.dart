@@ -17,8 +17,6 @@ class PushManager {
     FlutterPushBridge.setup(FlutterPushBridgeImpl(pushManager: this), binaryMessenger: _methodChannel.binaryMessenger);
   }
 
-
-
   Map<String, TopicObserver> topicObservers = {};
   Map<String, PushObserver> pushObservers = {};
   Map<String, ConnectStatusObserver> connObservers = {};
@@ -35,24 +33,27 @@ class PushManager {
     topicObservers[key]?.onSubscribe(topicData.topic, topicData.result);
   }
 
+  PushBridge createPushBridge(PushConfig config) {
+    return PushBridge(config:config, pushManager: this);
+  }
   ///
   /// 连接
   /// */
-  void connect(PushConfig config) async {
+  Future<void> _connect(PushConfig config) async {
     await _nativePushBridge.connect(InitRequestParam(key: "push_init", data: config));
   }
 
   ///
   /// 断开连接
   /// */
-  void disconnect(String appId) async {
+  Future<void> _disconnect(String appId) async {
     await _nativePushBridge.disconnect(RequestParam(key: "push_disconnect", data: {'appId' : appId}));
   }
 
   ///
   /// 添加连接状态监听
   /// */
-  void addConnStatusObserver(String appId, ConnectStatusObserver observer) async {
+  Future<void> _addConnStatusObserver(String appId, ConnectStatusObserver observer) async {
     var contain = connObservers.values.contains(observer);
     if (!contain) {
       var callbackKey = 'conn_status_${const Uuid().v1()}';
@@ -66,7 +67,7 @@ class PushManager {
   ///
   /// 移除连接状态监听
   /// */
-  void removeConnStatusObserver(String appId, ConnectStatusObserver observer) async {
+  Future<void> _removeConnStatusObserver(String appId, ConnectStatusObserver observer) async {
     String? callbackKey;
     for (MapEntry<String, ConnectStatusObserver> entry
         in connObservers.entries) {
@@ -86,7 +87,7 @@ class PushManager {
   ///
   /// 添加推送消息监听
   /// */
-  void addPushObserver(String appId, PushObserver observer) async {
+  Future<void> _addPushObserver(String appId, PushObserver observer) async {
     var contain = pushObservers.containsValue(observer);
     if (!contain) {
       var callbackKey = 'push_${const Uuid().v1()}';
@@ -100,7 +101,7 @@ class PushManager {
   ///
   /// 移除连接状态监听
   /// */
-  void removePushObserver(String appId, PushObserver observer) async {
+  Future<void> _removePushObserver(String appId, PushObserver observer) async {
     String? callbackKey;
     for (MapEntry<String, PushObserver> entry in pushObservers.entries) {
       if (entry.value == observer) {
@@ -119,35 +120,35 @@ class PushManager {
   ///
   /// 设置别名
   /// */
-  Future<ResponseParam> setAlias(String appId, List<String> alias) async {
+  Future<ResponseParam> _setAlias(String appId, List<String> alias) async {
     return await _nativePushBridge.setAlias(SetAliasRequestParam(key: 'push_setAlias', data: SetAliasParam(appId: appId, alias: alias)));
   }
 
   ///
   /// 清除别名
   /// */
-  Future<ResponseParam> clearAlias(String appId) async {
+  Future<ResponseParam> _clearAlias(String appId) async {
     return await _nativePushBridge.clearAlias(RequestParam(key: "push_clearAlias", data: {'appId' : appId}));
   }
 
   ///
   /// 订阅主题
   /// */
-  void subscribeTopic(String appId, String topic) async {
+  Future<void> _subscribeTopic(String appId, String topic) async {
     await _nativePushBridge.subscribeTopic(RequestParam(key: 'push_subscribeTopic', data: {'topic': topic, 'appId':appId}));
   }
 
   ///
   /// 取消订阅主题
   /// */
-  void unsubscribeTopic(String appId, String topic) async {
+  Future<void> _unsubscribeTopic(String appId, String topic) async {
     await _nativePushBridge.unsubscribeTopic(RequestParam(key: 'push_unsubscribeTopic', data: {'topic': topic, 'appId':appId}));
   }
 
   ///
   /// 添加主题订阅监听
   /// */
-  void addTopicsObserver(String appId, TopicObserver observer) async {
+  Future<void> _addTopicsObserver(String appId, TopicObserver observer) async {
     var contain = topicObservers.containsValue(observer);
     if (!contain) {
       var callbackKey = 'topic_${const Uuid().v1()}';
@@ -161,7 +162,7 @@ class PushManager {
   ///
   /// 移除主题订阅监听
   /// */
-  void removeTopicsObserver(String appId, TopicObserver observer) async {
+  Future<void> _removeTopicsObserver(String appId, TopicObserver observer) async {
     String? callbackKey;
     for (MapEntry<String, TopicObserver> entry in topicObservers.entries) {
       if (entry.value == observer) {
@@ -175,5 +176,89 @@ class PushManager {
           key: 'push_removeTopicsObserver',
           data: ObserverData(appId: appId, callbackKey: callbackKey)));
     }
+  }
+}
+
+class PushBridge {
+  late PushManager pushManager;
+  late PushConfig config;
+  PushBridge({ required config, required pushManager});
+
+  ///
+  /// 连接
+  /// */
+  Future<void> connect() async {
+    await pushManager._connect(config);
+  }
+
+  ///
+  /// 断开连接
+  /// */
+  Future<void> disconnect() async {
+    await pushManager._disconnect(config.appId);
+  }
+
+  ///
+  /// 添加连接状态监听
+  /// */
+  Future<void> addConnStatusObserver(ConnectStatusObserver observer) async {
+    await pushManager._addConnStatusObserver(config.appId, observer);
+  }
+
+  ///
+  /// 移除连接状态监听
+  /// */
+  Future<void> removeConnStatusObserver(ConnectStatusObserver observer) async {
+    await pushManager._removeConnStatusObserver(config.appId, observer);
+  }
+
+  ///
+  /// 添加推送消息监听
+  /// */
+  Future<void> addPushObserver(PushObserver observer) async {
+    await pushManager._addPushObserver(config.appId, observer);
+  }
+
+  ///
+  /// 移除连接状态监听
+  /// */
+  Future<void> removePushObserver(PushObserver observer) async {
+    await pushManager._removePushObserver(config.appId, observer);
+  }
+
+  ///
+  /// 设置别名
+  /// */
+  Future<ResponseParam> setAlias(List<String> alias) async {
+    return await pushManager._setAlias(config.appId, alias);
+  }
+
+  ///
+  /// 清除别名
+  /// */
+  Future<ResponseParam> clearAlias() async {
+    return await pushManager._clearAlias(config.appId);
+  }
+
+  ///
+  /// 订阅主题
+  /// */
+  Future<void> subscribeTopic(String topic) async {
+    await pushManager._subscribeTopic(config.appId, topic);
+  }
+
+  ///
+  /// 取消订阅主题
+  /// */
+  Future<void> unsubscribeTopic(String topic) async {
+    await pushManager._unsubscribeTopic(config.appId, topic);
+  }
+
+  Future<void> addTopicsObserver(TopicObserver observer) async {
+    await pushManager._addTopicsObserver(config.appId, observer);
+  }
+
+  Future<void> removeTopicsObserver(TopicObserver observer)async {
+    await pushManager._removeTopicsObserver(config.appId, observer);
   }
 }

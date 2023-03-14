@@ -25,11 +25,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
 
-    _pushLzflutterPlugin.getPushManager().connect(PushConfig(
+    _pushLzflutterPlugin.getPushManager().createPushBridge(PushConfig(
         hostApp: "saya",
         appId: "22631490",
         deviceId: "N_399daa7b0ccd5d9a",
-        defaultHosts: ['ws://172.17.32.53:39999/push']));
+        defaultHosts: ['ws://172.17.32.53:39999/push'])).connect();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -61,8 +61,35 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Container(
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  TextButton(onPressed: () {
+
+                  }, child: const Text('建立连接')),
+                  TextButton(onPressed: () {
+
+                  }, child: const Text('断开连接')),
+                  TextButton(onPressed: () {
+
+                  }, child: const Text('设置别名')),
+                  TextButton(onPressed: () {
+
+                  }, child: const Text('清除别名')),
+                ],
+              ),
+              Row(children: [
+                TextButton(onPressed: () {
+
+                }, child: const Text('订阅topic')),
+                TextButton(onPressed: () {
+
+                }, child: const Text('取消订阅topic')),
+              ],)
+            ],
+          ),
         ),
       ),
     );

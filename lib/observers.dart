@@ -2,13 +2,13 @@
 import 'package:push_lzflutter/bridge.dart';
 
 mixin TopicObserver {
-  void onSubscribe(String topic, TopicSubscribeResult result);
+  void onSubscribe(String appId, String topic, TopicSubscribeResult result);
 }
 
 mixin PushObserver {
-  void onPush(PushMessageData pushData);
+  void onPush(String appId, PushMessageData pushData);
 }
 
 mixin ConnectStatusObserver {
-  void onConnectStatusChanged(ConnectInfo info);
+  void onConnectStatusChanged(String appId, ConnectInfo info);
 }

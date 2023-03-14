@@ -21,16 +21,16 @@ class PushManager {
   Map<String, PushObserver> pushObservers = {};
   Map<String, ConnectStatusObserver> connObservers = {};
 
-  void callConnStatusObserver(String key, String? appId, ConnectInfo connInfo) {
-    connObservers[key]?.onConnectStatusChanged(connInfo);
+  void callConnStatusObserver(String key, String appId, ConnectInfo connInfo) {
+    connObservers[key]?.onConnectStatusChanged(appId, connInfo);
   }
 
-  void callPushObserver(String key, String? appId, PushMessageData pushData) {
-    pushObservers[key]?.onPush(pushData);
+  void callPushObserver(String key, String appId, PushMessageData pushData) {
+    pushObservers[key]?.onPush(appId, pushData);
   }
 
-  void callTopicObserverCall(String key, String? appId, TopicSubscribeData topicData) {
-    topicObservers[key]?.onSubscribe(topicData.topic, topicData.result);
+  void callTopicObserverCall(String key, String appId, TopicSubscribeData topicData) {
+    topicObservers[key]?.onSubscribe(appId, topicData.topic, topicData.result);
   }
 
   PushBridge createPushBridge(PushConfig config) {
@@ -180,9 +180,9 @@ class PushManager {
 }
 
 class PushBridge {
-  late PushManager pushManager;
-  late PushConfig config;
-  PushBridge({ required config, required pushManager});
+  PushManager pushManager;
+  PushConfig config;
+  PushBridge({required this.config, required this.pushManager});
 
   ///
   /// 连接

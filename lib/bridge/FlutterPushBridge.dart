@@ -9,19 +9,19 @@ class FlutterPushBridgeImpl extends FlutterPushBridge {
 
   @override
   ResponseParam onConnStatusObserverCall(ConnStatusObserverCallParam param) {
-    pushManager.callConnStatusObserver(param.key, param.data);
+    pushManager.callConnStatusObserver(param.data.callbackKey, param.data.appId, param.data.data);
     return ResponseParam(code : ResponseCode.success);
   }
 
   @override
   ResponseParam onPushObserverCall(PushObserverCallParam param) {
-    pushManager.callPushObserver(param.key, param.data);
+    pushManager.callPushObserver(param.data.callbackKey, param.data.appId, param.data.data);
     return ResponseParam(code : ResponseCode.success);
   }
 
   @override
   ResponseParam onTopicObserverCall(TopicObserverCallParam param) {
-    pushManager.callTopicObserverCall(param.key, param.data);
+    pushManager.callTopicObserverCall(param.data.callbackKey, param.data.appId, param.data.data);
     return ResponseParam(code : ResponseCode.success);
   }
 

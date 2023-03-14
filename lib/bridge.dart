@@ -110,13 +110,17 @@ class InitRequestParam {
 
 class ObserverData {
   ObserverData({
+    required this.appId,
     required this.callbackKey,
   });
+
+  String appId;
 
   String callbackKey;
 
   Object encode() {
     return <Object?>[
+      appId,
       callbackKey,
     ];
   }
@@ -124,7 +128,8 @@ class ObserverData {
   static ObserverData decode(Object result) {
     result as List<Object?>;
     return ObserverData(
-      callbackKey: result[0]! as String,
+      appId: result[0]! as String,
+      callbackKey: result[1]! as String,
     );
   }
 }
@@ -155,20 +160,46 @@ class ObserverRequestParam {
   }
 }
 
-class SetAliasRequestParam {
-  SetAliasRequestParam({
-    required this.key,
+class SetAliasParam {
+  SetAliasParam({
+    required this.appId,
     required this.alias,
   });
 
-  String key;
+  String appId;
 
   List<String?> alias;
 
   Object encode() {
     return <Object?>[
-      key,
+      appId,
       alias,
+    ];
+  }
+
+  static SetAliasParam decode(Object result) {
+    result as List<Object?>;
+    return SetAliasParam(
+      appId: result[0]! as String,
+      alias: (result[1] as List<Object?>?)!.cast<String?>(),
+    );
+  }
+}
+
+class SetAliasRequestParam {
+  SetAliasRequestParam({
+    required this.key,
+    required this.data,
+  });
+
+  String key;
+
+  SetAliasParam data;
+
+  Object encode() {
+    return <Object?>[
+      key,
+      data.encode(),
     ];
   }
 
@@ -176,7 +207,7 @@ class SetAliasRequestParam {
     result as List<Object?>;
     return SetAliasRequestParam(
       key: result[0]! as String,
-      alias: (result[1] as List<Object?>?)!.cast<String?>(),
+      data: SetAliasParam.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -253,6 +284,37 @@ class ConnectInfo {
   }
 }
 
+class ConnStatusCall {
+  ConnStatusCall({
+    required this.callbackKey,
+    required this.appId,
+    required this.data,
+  });
+
+  String callbackKey;
+
+  String appId;
+
+  ConnectInfo data;
+
+  Object encode() {
+    return <Object?>[
+      callbackKey,
+      appId,
+      data.encode(),
+    ];
+  }
+
+  static ConnStatusCall decode(Object result) {
+    result as List<Object?>;
+    return ConnStatusCall(
+      callbackKey: result[0]! as String,
+      appId: result[1]! as String,
+      data: ConnectInfo.decode(result[2]! as List<Object?>),
+    );
+  }
+}
+
 class ConnStatusObserverCallParam {
   ConnStatusObserverCallParam({
     required this.key,
@@ -261,7 +323,7 @@ class ConnStatusObserverCallParam {
 
   String key;
 
-  ConnectInfo data;
+  ConnStatusCall data;
 
   Object encode() {
     return <Object?>[
@@ -274,7 +336,7 @@ class ConnStatusObserverCallParam {
     result as List<Object?>;
     return ConnStatusObserverCallParam(
       key: result[0]! as String,
-      data: ConnectInfo.decode(result[1]! as List<Object?>),
+      data: ConnStatusCall.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -361,6 +423,37 @@ class PushMessageData {
   }
 }
 
+class PushCall {
+  PushCall({
+    required this.callbackKey,
+    required this.appId,
+    required this.data,
+  });
+
+  String callbackKey;
+
+  String appId;
+
+  PushMessageData data;
+
+  Object encode() {
+    return <Object?>[
+      callbackKey,
+      appId,
+      data.encode(),
+    ];
+  }
+
+  static PushCall decode(Object result) {
+    result as List<Object?>;
+    return PushCall(
+      callbackKey: result[0]! as String,
+      appId: result[1]! as String,
+      data: PushMessageData.decode(result[2]! as List<Object?>),
+    );
+  }
+}
+
 class PushObserverCallParam {
   PushObserverCallParam({
     required this.key,
@@ -369,7 +462,7 @@ class PushObserverCallParam {
 
   String key;
 
-  PushMessageData data;
+  PushCall data;
 
   Object encode() {
     return <Object?>[
@@ -382,7 +475,7 @@ class PushObserverCallParam {
     result as List<Object?>;
     return PushObserverCallParam(
       key: result[0]! as String,
-      data: PushMessageData.decode(result[1]! as List<Object?>),
+      data: PushCall.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -447,6 +540,37 @@ class TopicSubscribeData {
   }
 }
 
+class TopicCall {
+  TopicCall({
+    required this.callbackKey,
+    required this.appId,
+    required this.data,
+  });
+
+  String callbackKey;
+
+  String appId;
+
+  TopicSubscribeData data;
+
+  Object encode() {
+    return <Object?>[
+      callbackKey,
+      appId,
+      data.encode(),
+    ];
+  }
+
+  static TopicCall decode(Object result) {
+    result as List<Object?>;
+    return TopicCall(
+      callbackKey: result[0]! as String,
+      appId: result[1]! as String,
+      data: TopicSubscribeData.decode(result[2]! as List<Object?>),
+    );
+  }
+}
+
 class TopicObserverCallParam {
   TopicObserverCallParam({
     required this.key,
@@ -455,7 +579,7 @@ class TopicObserverCallParam {
 
   String key;
 
-  TopicSubscribeData data;
+  TopicCall data;
 
   Object encode() {
     return <Object?>[
@@ -468,7 +592,7 @@ class TopicObserverCallParam {
     result as List<Object?>;
     return TopicObserverCallParam(
       key: result[0]! as String,
-      data: TopicSubscribeData.decode(result[1]! as List<Object?>),
+      data: TopicCall.decode(result[1]! as List<Object?>),
     );
   }
 }
@@ -495,8 +619,11 @@ class _NativePushBridgeCodec extends StandardMessageCodec {
     } else if (value is ResponseParam) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is SetAliasRequestParam) {
+    } else if (value is SetAliasParam) {
       buffer.putUint8(134);
+      writeValue(buffer, value.encode());
+    } else if (value is SetAliasRequestParam) {
+      buffer.putUint8(135);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -519,6 +646,8 @@ class _NativePushBridgeCodec extends StandardMessageCodec {
       case 133: 
         return ResponseParam.decode(readValue(buffer)!);
       case 134: 
+        return SetAliasParam.decode(readValue(buffer)!);
+      case 135: 
         return SetAliasRequestParam.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -568,13 +697,14 @@ class NativePushBridge {
 
   ///
   /// 断开连接
+  /// param: appId
   /// 
-  Future<ResponseParam> disconnect() async {
+  Future<ResponseParam> disconnect(RequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.disconnect', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+        await channel.send(<Object?>[arg_param]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -748,13 +878,14 @@ class NativePushBridge {
 
   ///
   /// 清除别名
+  /// param: appId
   /// 
-  Future<ResponseParam> clearAlias() async {
+  Future<ResponseParam> clearAlias(RequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.NativePushBridge.clearAlias', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(null) as List<Object?>?;
+        await channel.send(<Object?>[arg_param]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -778,6 +909,7 @@ class NativePushBridge {
 
   ///
   /// 订阅主题
+  /// param: appId, topic
   /// 
   Future<ResponseParam> subscribeTopic(RequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
@@ -808,6 +940,7 @@ class NativePushBridge {
 
   ///
   /// 取消订阅主题
+  /// param: appId, topic
   /// 
   Future<ResponseParam> unsubscribeTopic(RequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
@@ -901,32 +1034,41 @@ class _FlutterPushBridgeCodec extends StandardMessageCodec {
   const _FlutterPushBridgeCodec();
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is ConnStatusObserverCallParam) {
+    if (value is ConnStatusCall) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is ConnectInfo) {
+    } else if (value is ConnStatusObserverCallParam) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is PushMessageData) {
+    } else if (value is ConnectInfo) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else if (value is PushObserverCallParam) {
+    } else if (value is PushCall) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    } else if (value is ResponseParam) {
+    } else if (value is PushMessageData) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is TopicObserverCallParam) {
+    } else if (value is PushObserverCallParam) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is TopicSubscribeData) {
+    } else if (value is ResponseParam) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is TopicSubscribeResult) {
+    } else if (value is TopicCall) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    } else if (value is TransferData) {
+    } else if (value is TopicObserverCallParam) {
       buffer.putUint8(136);
+      writeValue(buffer, value.encode());
+    } else if (value is TopicSubscribeData) {
+      buffer.putUint8(137);
+      writeValue(buffer, value.encode());
+    } else if (value is TopicSubscribeResult) {
+      buffer.putUint8(138);
+      writeValue(buffer, value.encode());
+    } else if (value is TransferData) {
+      buffer.putUint8(139);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -937,22 +1079,28 @@ class _FlutterPushBridgeCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 128: 
-        return ConnStatusObserverCallParam.decode(readValue(buffer)!);
+        return ConnStatusCall.decode(readValue(buffer)!);
       case 129: 
-        return ConnectInfo.decode(readValue(buffer)!);
+        return ConnStatusObserverCallParam.decode(readValue(buffer)!);
       case 130: 
-        return PushMessageData.decode(readValue(buffer)!);
+        return ConnectInfo.decode(readValue(buffer)!);
       case 131: 
-        return PushObserverCallParam.decode(readValue(buffer)!);
+        return PushCall.decode(readValue(buffer)!);
       case 132: 
-        return ResponseParam.decode(readValue(buffer)!);
+        return PushMessageData.decode(readValue(buffer)!);
       case 133: 
-        return TopicObserverCallParam.decode(readValue(buffer)!);
+        return PushObserverCallParam.decode(readValue(buffer)!);
       case 134: 
-        return TopicSubscribeData.decode(readValue(buffer)!);
+        return ResponseParam.decode(readValue(buffer)!);
       case 135: 
-        return TopicSubscribeResult.decode(readValue(buffer)!);
+        return TopicCall.decode(readValue(buffer)!);
       case 136: 
+        return TopicObserverCallParam.decode(readValue(buffer)!);
+      case 137: 
+        return TopicSubscribeData.decode(readValue(buffer)!);
+      case 138: 
+        return TopicSubscribeResult.decode(readValue(buffer)!);
+      case 139: 
         return TransferData.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);

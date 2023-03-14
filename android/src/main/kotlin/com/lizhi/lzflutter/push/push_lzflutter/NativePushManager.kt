@@ -13,7 +13,6 @@ import com.yibasan.lizhifm.base.websocket.observer.CallbackHandle
 import com.yibasan.lizhifm.base.websocket.observer.ConnStatusObserverHandle
 import com.yibasan.lizhifm.base.websocket.observer.ITopicsObserver
 import com.yibasan.lizhifm.base.websocket.observer.PushObserverHandle
-import com.yibasan.lizhifm.sdk.platformtools.MobileUtils
 import com.yibasan.socket.network.util.ApplicationUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBridge {
 
-    var appId = ""
+//    var appId = ""
 
     val coroutineScope = GlobalScope
 
@@ -31,7 +30,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
         coroutineScope.launch(Dispatchers.Main) {
             try {
                 val configParam = param.data
-                appId = configParam.appId
+//                appId = configParam.appId
                 val configBuilder = ConnConfige.ConfigBuilder()
                     .setHostApp(configParam.hostApp) //例如：lizhi，tiya，pongpong，组件必填,app可以为空
                     //1：必须：例如荔枝对应的appId 为0，注意appId是否已经开通，如果未开通需要先开通，与服务端对应BusinessEnv
@@ -65,9 +64,9 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
         }
     }
 
-    override fun disconnect(): ResponseParam {
+    override fun disconnect(param: RequestParam): ResponseParam {
         return try {
-            WSPushManager.disConnect(appId)
+            WSPushManager.disConnect(param.data!!["appId"].toString())
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
             ResponseParam(ResponseCode.FAIL, e.message)
@@ -96,8 +95,8 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                             )
                             flutterPushBridge.onConnStatusObserverCall(
                                 ConnStatusObserverCallParam(
-                                    callbackKey,
-                                    transInfo
+                                    "ConnStatusObserver_onConnStatus",
+                                    ConnStatusCall(callbackKey, param.data.appId, transInfo)
                                 )
                             ) {
                                 //do nothing
@@ -106,7 +105,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                     }
                 }
                 connStatusObservers[callbackKey] = observer
-                WSPushManager.addConnStatusObserver(appId, observer)
+                WSPushManager.addConnStatusObserver(param.data.appId, observer)
             }
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
@@ -117,7 +116,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun removeConnStatusObserver(param: ObserverRequestParam): ResponseParam {
         val callbackKey = param.data.callbackKey
         connStatusObservers.remove(callbackKey)?.let {
-            WSPushManager.removeConnStatusObserver(appId, it)
+            WSPushManager.removeConnStatusObserver(param.data.appId, it)
         }
         return ResponseParam(ResponseCode.SUCCESS)
     }
@@ -145,8 +144,8 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                             val pushData = PushMessageData(data.type, transferData)
                             flutterPushBridge.onPushObserverCall(
                                 PushObserverCallParam(
-                                    callbackKey,
-                                    pushData
+                                    "PushObserver_onPush",
+                                    PushCall(callbackKey, param.data.appId, pushData)
                                 )
                             ) {
                                 //do nothing
@@ -155,7 +154,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                     }
                 }
                 pushObservers[callbackKey] = observer
-                WSPushManager.addPushObserver(appId, observer)
+                WSPushManager.addPushObserver(param.data.appId, observer)
             }
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
@@ -166,13 +165,13 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun removePushObserver(param: ObserverRequestParam): ResponseParam {
         val callbackKey = param.data.callbackKey
         pushObservers.remove(callbackKey)?.let {
-            WSPushManager.removePushObserver(appId, it)
+            WSPushManager.removePushObserver(param.data.appId, it)
         }
         return ResponseParam(ResponseCode.SUCCESS)
     }
 
     override fun setAlias(param: SetAliasRequestParam, callback: (Result<ResponseParam>) -> Unit) {
-        val alias2 = param.alias.run {
+        val alias2 = param.data.alias.run {
             val list = ArrayList<String>()
             forEach {
                 if (!it.isNullOrEmpty()) {
@@ -183,7 +182,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
         }
         WSPushManager.setAlias(
             ApplicationUtils.context,
-            appId,
+            param.data.appId,
             alias2,
             object : CallbackHandle.Stub() {
                 override fun onSuccess(p0: String?) {
@@ -201,8 +200,8 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
             })
     }
 
-    override fun clearAlias(callback: (Result<ResponseParam>) -> Unit) {
-        WSPushManager.clearAlias(ApplicationUtils.context, appId, object : CallbackHandle.Stub() {
+    override fun clearAlias(param: RequestParam, callback: (Result<ResponseParam>) -> Unit) {
+        WSPushManager.clearAlias(ApplicationUtils.context, param.data!!["appId"].toString(), object : CallbackHandle.Stub() {
             override fun onSuccess(p0: String?) {
                 coroutineScope.launch(Dispatchers.Main) {
                     callback(Result.success(ResponseParam(ResponseCode.SUCCESS)))
@@ -218,12 +217,16 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     }
 
     override fun subscribeTopic(param: RequestParam): ResponseParam {
-        WSPushManager.subscribeTopic(appId, param.data?.get("topic")?.toString() ?: "")
+        val topic = param.data?.get("topic")?.toString() ?: ""
+        val appId = param.data?.get("appId")?.toString() ?: ""
+        WSPushManager.subscribeTopic(appId, topic)
         return ResponseParam(ResponseCode.SUCCESS)
     }
 
     override fun unsubscribeTopic(param: RequestParam): ResponseParam {
-        WSPushManager.unsubscribeTopic(appId, param.data?.get("topic")?.toString() ?: "")
+        val topic = param.data?.get("topic")?.toString() ?: ""
+        val appId = param.data?.get("appId")?.toString() ?: ""
+        WSPushManager.unsubscribeTopic(appId, topic)
         return ResponseParam(ResponseCode.SUCCESS)
     }
 
@@ -253,8 +256,8 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                             result?.let {
                                 flutterPushBridge.onTopicObserverCall(
                                     TopicObserverCallParam(
-                                        callbackKey,
-                                        TopicSubscribeData(topic ?: "", result)
+                                        "TopicsObserver_onSubscribe",
+                                        TopicCall(callbackKey, param.data.appId, TopicSubscribeData(topic ?: "", result))
                                     )
                                 ) {
                                     //do nothing
@@ -265,7 +268,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
 
                 }
                 topicObservers[callbackKey] = observer
-                WSPushManager.addTopicsObserver(appId, observer)
+                WSPushManager.addTopicsObserver(param.data.appId, observer)
             }
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
@@ -276,7 +279,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun removeTopicsObserver(param: ObserverRequestParam): ResponseParam {
         val callbackKey = param.data.callbackKey
         topicObservers.remove(callbackKey)?.let {
-            WSPushManager.removeTopicsObserver(appId, it)
+            WSPushManager.removeTopicsObserver(param.data.appId, it)
         }
         return ResponseParam(ResponseCode.SUCCESS)
     }

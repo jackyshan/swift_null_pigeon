@@ -129,18 +129,21 @@ data class InitRequestParam (
 
 /** Generated class from Pigeon that represents data sent in messages. */
 data class ObserverData (
+  val appId: String,
   val callbackKey: String
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): ObserverData {
-      val callbackKey = list[0] as String
-      return ObserverData(callbackKey)
+      val appId = list[0] as String
+      val callbackKey = list[1] as String
+      return ObserverData(appId, callbackKey)
     }
   }
   fun toList(): List<Any?> {
     return listOf<Any?>(
+      appId,
       callbackKey,
     )
   }
@@ -169,23 +172,45 @@ data class ObserverRequestParam (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class SetAliasParam (
+  val appId: String,
+  val alias: List<String?>
+
+) {
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    fun fromList(list: List<Any?>): SetAliasParam {
+      val appId = list[0] as String
+      val alias = list[1] as List<String?>
+      return SetAliasParam(appId, alias)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf<Any?>(
+      appId,
+      alias,
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class SetAliasRequestParam (
   val key: String,
-  val alias: List<String?>
+  val data: SetAliasParam
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): SetAliasRequestParam {
       val key = list[0] as String
-      val alias = list[1] as List<String?>
-      return SetAliasRequestParam(key, alias)
+      val data = SetAliasParam.fromList(list[1] as List<Any?>)
+      return SetAliasRequestParam(key, data)
     }
   }
   fun toList(): List<Any?> {
     return listOf<Any?>(
       key,
-      alias,
+      data.toList(),
     )
   }
 }
@@ -252,16 +277,41 @@ data class ConnectInfo (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class ConnStatusCall (
+  val callbackKey: String,
+  val appId: String,
+  val data: ConnectInfo
+
+) {
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    fun fromList(list: List<Any?>): ConnStatusCall {
+      val callbackKey = list[0] as String
+      val appId = list[1] as String
+      val data = ConnectInfo.fromList(list[2] as List<Any?>)
+      return ConnStatusCall(callbackKey, appId, data)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf<Any?>(
+      callbackKey,
+      appId,
+      data.toList(),
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class ConnStatusObserverCallParam (
   val key: String,
-  val data: ConnectInfo
+  val data: ConnStatusCall
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): ConnStatusObserverCallParam {
       val key = list[0] as String
-      val data = ConnectInfo.fromList(list[1] as List<Any?>)
+      val data = ConnStatusCall.fromList(list[1] as List<Any?>)
       return ConnStatusObserverCallParam(key, data)
     }
   }
@@ -341,16 +391,41 @@ data class PushMessageData (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class PushCall (
+  val callbackKey: String,
+  val appId: String,
+  val data: PushMessageData
+
+) {
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    fun fromList(list: List<Any?>): PushCall {
+      val callbackKey = list[0] as String
+      val appId = list[1] as String
+      val data = PushMessageData.fromList(list[2] as List<Any?>)
+      return PushCall(callbackKey, appId, data)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf<Any?>(
+      callbackKey,
+      appId,
+      data.toList(),
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class PushObserverCallParam (
   val key: String,
-  val data: PushMessageData
+  val data: PushCall
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): PushObserverCallParam {
       val key = list[0] as String
-      val data = PushMessageData.fromList(list[1] as List<Any?>)
+      val data = PushCall.fromList(list[1] as List<Any?>)
       return PushObserverCallParam(key, data)
     }
   }
@@ -416,16 +491,41 @@ data class TopicSubscribeData (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class TopicCall (
+  val callbackKey: String,
+  val appId: String,
+  val data: TopicSubscribeData
+
+) {
+  companion object {
+    @Suppress("UNCHECKED_CAST")
+    fun fromList(list: List<Any?>): TopicCall {
+      val callbackKey = list[0] as String
+      val appId = list[1] as String
+      val data = TopicSubscribeData.fromList(list[2] as List<Any?>)
+      return TopicCall(callbackKey, appId, data)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf<Any?>(
+      callbackKey,
+      appId,
+      data.toList(),
+    )
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class TopicObserverCallParam (
   val key: String,
-  val data: TopicSubscribeData
+  val data: TopicCall
 
 ) {
   companion object {
     @Suppress("UNCHECKED_CAST")
     fun fromList(list: List<Any?>): TopicObserverCallParam {
       val key = list[0] as String
-      val data = TopicSubscribeData.fromList(list[1] as List<Any?>)
+      val data = TopicCall.fromList(list[1] as List<Any?>)
       return TopicObserverCallParam(key, data)
     }
   }
@@ -473,6 +573,11 @@ private object NativePushBridgeCodec : StandardMessageCodec() {
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          SetAliasParam.fromList(it)
+        }
+      }
+      135.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           SetAliasRequestParam.fromList(it)
         }
       }
@@ -505,8 +610,12 @@ private object NativePushBridgeCodec : StandardMessageCodec() {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is SetAliasRequestParam -> {
+      is SetAliasParam -> {
         stream.write(134)
+        writeValue(stream, value.toList())
+      }
+      is SetAliasRequestParam -> {
+        stream.write(135)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -525,9 +634,10 @@ interface NativePushBridge {
   /**
    *
    * 断开连接
+   * param: appId
    * 
    */
-  fun disconnect(): ResponseParam
+  fun disconnect(param: RequestParam): ResponseParam
   /**
    *
    * 添加连接状态监听
@@ -561,18 +671,21 @@ interface NativePushBridge {
   /**
    *
    * 清除别名
+   * param: appId
    * 
    */
-  fun clearAlias(callback: (Result<ResponseParam>) -> Unit)
+  fun clearAlias(param: RequestParam, callback: (Result<ResponseParam>) -> Unit)
   /**
    *
    * 订阅主题
+   * param: appId, topic
    * 
    */
   fun subscribeTopic(param: RequestParam): ResponseParam
   /**
    *
    * 取消订阅主题
+   * param: appId, topic
    * 
    */
   fun unsubscribeTopic(param: RequestParam): ResponseParam
@@ -620,10 +733,12 @@ interface NativePushBridge {
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.NativePushBridge.disconnect", codec)
         if (api != null) {
-          channel.setMessageHandler { _, reply ->
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val paramArg = args[0] as RequestParam
             var wrapped: List<Any?>
             try {
-              wrapped = listOf<Any?>(api.disconnect())
+              wrapped = listOf<Any?>(api.disconnect(paramArg))
             } catch (exception: Error) {
               wrapped = wrapError(exception)
             }
@@ -728,8 +843,10 @@ interface NativePushBridge {
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.NativePushBridge.clearAlias", codec)
         if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            api.clearAlias() { result: Result<ResponseParam> ->
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val paramArg = args[0] as RequestParam
+            api.clearAlias(paramArg) { result: Result<ResponseParam> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(wrapError(error))
@@ -824,45 +941,60 @@ private object FlutterPushBridgeCodec : StandardMessageCodec() {
     return when (type) {
       128.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConnStatusObserverCallParam.fromList(it)
+          ConnStatusCall.fromList(it)
         }
       }
       129.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConnectInfo.fromList(it)
+          ConnStatusObserverCallParam.fromList(it)
         }
       }
       130.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PushMessageData.fromList(it)
+          ConnectInfo.fromList(it)
         }
       }
       131.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PushObserverCallParam.fromList(it)
+          PushCall.fromList(it)
         }
       }
       132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ResponseParam.fromList(it)
+          PushMessageData.fromList(it)
         }
       }
       133.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopicObserverCallParam.fromList(it)
+          PushObserverCallParam.fromList(it)
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopicSubscribeData.fromList(it)
+          ResponseParam.fromList(it)
         }
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopicSubscribeResult.fromList(it)
+          TopicCall.fromList(it)
         }
       }
       136.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TopicObserverCallParam.fromList(it)
+        }
+      }
+      137.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TopicSubscribeData.fromList(it)
+        }
+      }
+      138.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TopicSubscribeResult.fromList(it)
+        }
+      }
+      139.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TransferData.fromList(it)
         }
@@ -872,40 +1004,52 @@ private object FlutterPushBridgeCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is ConnStatusObserverCallParam -> {
+      is ConnStatusCall -> {
         stream.write(128)
         writeValue(stream, value.toList())
       }
-      is ConnectInfo -> {
+      is ConnStatusObserverCallParam -> {
         stream.write(129)
         writeValue(stream, value.toList())
       }
-      is PushMessageData -> {
+      is ConnectInfo -> {
         stream.write(130)
         writeValue(stream, value.toList())
       }
-      is PushObserverCallParam -> {
+      is PushCall -> {
         stream.write(131)
         writeValue(stream, value.toList())
       }
-      is ResponseParam -> {
+      is PushMessageData -> {
         stream.write(132)
         writeValue(stream, value.toList())
       }
-      is TopicObserverCallParam -> {
+      is PushObserverCallParam -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is TopicSubscribeData -> {
+      is ResponseParam -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is TopicSubscribeResult -> {
+      is TopicCall -> {
         stream.write(135)
         writeValue(stream, value.toList())
       }
-      is TransferData -> {
+      is TopicObserverCallParam -> {
         stream.write(136)
+        writeValue(stream, value.toList())
+      }
+      is TopicSubscribeData -> {
+        stream.write(137)
+        writeValue(stream, value.toList())
+      }
+      is TopicSubscribeResult -> {
+        stream.write(138)
+        writeValue(stream, value.toList())
+      }
+      is TransferData -> {
+        stream.write(139)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

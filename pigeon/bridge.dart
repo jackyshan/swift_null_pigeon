@@ -31,6 +31,7 @@ class InitRequestParam {
 }
 
 class ObserverData {
+  late String appId;
   late String callbackKey;
 }
 
@@ -44,9 +45,14 @@ class ObserverCallRequestParam {
   late ObserverData data;
 }
 
+class SetAliasParam {
+  late String appId;
+  late List<String?> alias;
+}
+
 class SetAliasRequestParam {
   late String key;
-  late List<String?> alias;
+  late SetAliasParam data;
 }
 
 class PushConfig {
@@ -67,8 +73,9 @@ abstract class NativePushBridge {
 
   ///
   /// 断开连接
+  /// param: appId
   /// 
-  ResponseParam disconnect();
+  ResponseParam disconnect(RequestParam param);
 
   ///
   /// 添加连接状态监听
@@ -98,17 +105,20 @@ abstract class NativePushBridge {
 
   ///
   /// 清除别名
+  /// param: appId
   /// 
   @async
-  ResponseParam clearAlias();
+  ResponseParam clearAlias(RequestParam param);
 
   ///
   /// 订阅主题
+  /// param: appId, topic
   /// 
   ResponseParam subscribeTopic(RequestParam param);
 
   ///
   /// 取消订阅主题
+  /// param: appId, topic
   /// 
   ResponseParam unsubscribeTopic(RequestParam param);
 
@@ -138,9 +148,14 @@ class ConnectInfo {
   ConnectStatus? connStatus;
 }
 
+class ConnStatusCall {
+  late String callbackKey;
+  late String appId;
+  late ConnectInfo data;
+}
 class ConnStatusObserverCallParam {
   late String key;
-  late ConnectInfo data;
+  late ConnStatusCall data;
 }
 
 class TransferData {
@@ -160,9 +175,14 @@ class PushMessageData {
   TransferData? data;
 }
 
+class PushCall {
+  late String callbackKey;
+  late String appId;
+  late PushMessageData data;
+}
 class PushObserverCallParam {
   late String key;
-  late PushMessageData data;
+  late PushCall data;
 }
 
 
@@ -185,9 +205,14 @@ class TopicSubscribeData {
   late TopicSubscribeResult result;
 }
 
+class TopicCall {
+  late String callbackKey;
+  late String appId;
+  late TopicSubscribeData data;
+}
 class TopicObserverCallParam {
   late String key;
-  late TopicSubscribeData data;
+  late TopicCall data;
 }
 
 @FlutterApi()

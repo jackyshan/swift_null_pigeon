@@ -85,25 +85,28 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
             if (!connStatusObservers.contains(callbackKey)) {
                 val observer = object : ConnStatusObserverHandle.Stub() {
                     override fun onConnStatus(appId: String?, bundle: Bundle?) {
-                        val info = ConnInfo.getConnInfo(bundle)
-                        info?.let {
-                            val connStatus = when (info.connStatus) {
-                                ConnStatus.CONNECTED -> ConnectStatus.CONNECTED
-                                ConnStatus.CONNECTING -> ConnectStatus.CONNECTING
-                                ConnStatus.DISCONNECT -> ConnectStatus.DISCONNECT
-                                else -> ConnectStatus.DISCONNECT
-                            }
-                            val transInfo = ConnectInfo(
-                                info.errorCode.toLong(), info.errorMessage,
-                                connStatus
-                            )
-                            flutterPushBridge.onConnStatusObserverCall(
-                                ConnStatusObserverCallParam(
-                                    "ConnStatusObserver_onConnStatus",
-                                    ConnStatusCall(callbackKey, param.data.appId, transInfo)
+                        coroutineScope.launch(Dispatchers.Main) {
+                            val info = ConnInfo.getConnInfo(bundle)
+                            info?.let {
+                                val connStatus = when (info.connStatus) {
+                                    ConnStatus.CONNECTED -> ConnectStatus.CONNECTED
+                                    ConnStatus.CONNECTING -> ConnectStatus.CONNECTING
+                                    ConnStatus.DISCONNECT -> ConnectStatus.DISCONNECT
+                                    else -> ConnectStatus.DISCONNECT
+                                }
+                                val transInfo = ConnectInfo(
+                                    info.errorCode.toLong(), info.errorMessage,
+                                    connStatus
                                 )
-                            ) {
-                                //do nothing
+
+                                flutterPushBridge.onConnStatusObserverCall(
+                                    ConnStatusObserverCallParam(
+                                        "ConnStatusObserver_onConnStatus",
+                                        ConnStatusCall(callbackKey, param.data.appId, transInfo)
+                                    )
+                                ) {
+                                    //do nothing
+                                }
                             }
                         }
                     }
@@ -146,13 +149,15 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                                 )
                             }
                             val pushData = PushMessageData(data.type, transferData)
-                            flutterPushBridge.onPushObserverCall(
-                                PushObserverCallParam(
-                                    "PushObserver_onPush",
-                                    PushCall(callbackKey, param.data.appId, pushData)
-                                )
-                            ) {
-                                //do nothing
+                            coroutineScope.launch(Dispatchers.Main) {
+                                flutterPushBridge.onPushObserverCall(
+                                    PushObserverCallParam(
+                                        "PushObserver_onPush",
+                                        PushCall(callbackKey, param.data.appId, pushData)
+                                    )
+                                ) {
+                                    //do nothing
+                                }
                             }
                         }
                     }
@@ -258,13 +263,19 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                                 )
                             }
                             result?.let {
-                                flutterPushBridge.onTopicObserverCall(
-                                    TopicObserverCallParam(
-                                        "TopicsObserver_onSubscribe",
-                                        TopicCall(callbackKey, param.data.appId, TopicSubscribeData(topic ?: "", result))
-                                    )
-                                ) {
-                                    //do nothing
+                                coroutineScope.launch(Dispatchers.Main) {
+                                    flutterPushBridge.onTopicObserverCall(
+                                        TopicObserverCallParam(
+                                            "TopicsObserver_onSubscribe",
+                                            TopicCall(
+                                                callbackKey,
+                                                param.data.appId,
+                                                TopicSubscribeData(topic ?: "", result)
+                                            )
+                                        )
+                                    ) {
+                                        //do nothing
+                                    }
                                 }
                             }
                         }

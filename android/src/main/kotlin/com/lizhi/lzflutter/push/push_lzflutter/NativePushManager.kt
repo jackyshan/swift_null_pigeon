@@ -1,28 +1,23 @@
 package com.lizhi.lzflutter.push.push_lzflutter
 
-import android.os.Bundle
-import com.lizhi.component.net.websocket.WSPushManager
 import com.lizhi.component.net.websocket.impl.SubscribeResult
 import com.lizhi.component.net.websocket.impl.TopicStatus
 import com.lizhi.component.net.websocket.model.ConnConfige
 import com.lizhi.component.net.websocket.model.ConnInfo
 import com.lizhi.component.net.websocket.model.ConnStatus
 import com.lizhi.component.net.websocket.model.PushData
+import com.lizhi.component.net.websocket.observer.Callback
+import com.lizhi.component.net.websocket.observer.ConnStatusObserver
+import com.lizhi.component.net.websocket.observer.PushObserver
+import com.lizhi.component.net.websocket.observer.TopicsObserver
 import com.lizhi.flutter_pigeon.*
-import com.yibasan.lizhifm.base.websocket.observer.CallbackHandle
-import com.yibasan.lizhifm.base.websocket.observer.ConnStatusObserverHandle
-import com.yibasan.lizhifm.base.websocket.observer.ITopicsObserver
-import com.yibasan.lizhifm.base.websocket.observer.PushObserverHandle
-import com.yibasan.socket.network.util.ApplicationUtils
+import com.yibasan.lizhifm.itnet.remote.ITNetPushManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBridge {
-
-//    var appId = ""
-
     val coroutineScope = GlobalScope
     override fun initPush(param: InitRequestParam): ResponseParam {
         //do nothing
@@ -55,7 +50,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                     )
                 }
                 val config = configBuilder.build()
-                WSPushManager.connect(config, true)
+                ITNetPushManager.connect(config)
                 launch(Dispatchers.Main) {
                     callback(Result.success(ResponseParam(ResponseCode.SUCCESS)))
                 }
@@ -70,23 +65,22 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
 
     override fun disconnect(param: RequestParam): ResponseParam {
         return try {
-            WSPushManager.disConnect(param.data!!["appId"].toString())
+            ITNetPushManager.disConnect(param.data!!["appId"].toString())
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
             ResponseParam(ResponseCode.FAIL, e.message)
         }
     }
 
-    private val connStatusObservers = mutableMapOf<String, ConnStatusObserverHandle>()
+    private val connStatusObservers = mutableMapOf<String, ConnStatusObserver>()
 
     override fun addConnStatusObserver(param: ObserverRequestParam): ResponseParam {
         return try {
             val callbackKey = param.data.callbackKey
             if (!connStatusObservers.contains(callbackKey)) {
-                val observer = object : ConnStatusObserverHandle.Stub() {
-                    override fun onConnStatus(appId: String?, bundle: Bundle?) {
+                val observer = object : ConnStatusObserver {
+                    override fun onConnStatus(appId: String, info: ConnInfo?) {
                         coroutineScope.launch(Dispatchers.Main) {
-                            val info = ConnInfo.getConnInfo(bundle)
                             info?.let {
                                 val connStatus = when (info.connStatus) {
                                     ConnStatus.CONNECTED -> ConnectStatus.CONNECTED
@@ -112,7 +106,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                     }
                 }
                 connStatusObservers[callbackKey] = observer
-                WSPushManager.addConnStatusObserver(param.data.appId, observer)
+                ITNetPushManager.addConnStatusObserver(param.data.appId, observer)
             }
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
@@ -123,19 +117,18 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun removeConnStatusObserver(param: ObserverRequestParam): ResponseParam {
         val callbackKey = param.data.callbackKey
         connStatusObservers.remove(callbackKey)?.let {
-            WSPushManager.removeConnStatusObserver(param.data.appId, it)
+            ITNetPushManager.removeConnStatusObserver(param.data.appId, it)
         }
         return ResponseParam(ResponseCode.SUCCESS)
     }
 
-    private val pushObservers = mutableMapOf<String, PushObserverHandle>()
+    private val pushObservers = mutableMapOf<String, PushObserver>()
     override fun addPushObserver(param: ObserverRequestParam): ResponseParam {
         return try {
             val callbackKey = param.data.callbackKey
             if (!pushObservers.contains(callbackKey)) {
-                val observer = object : PushObserverHandle.Stub() {
-                    override fun onPush(appId: String?, bundle: Bundle?) {
-                        val data = PushData.getPushData(bundle)
+                val observer = object : PushObserver {
+                    override fun onPush(appId: String?, data: PushData?) {
                         data?.let {
                             val transferData = data.data?.run {
                                 TransferData(
@@ -163,7 +156,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
                     }
                 }
                 pushObservers[callbackKey] = observer
-                WSPushManager.addPushObserver(param.data.appId, observer)
+                ITNetPushManager.addPushObserver(param.data.appId, observer)
             }
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
@@ -174,7 +167,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun removePushObserver(param: ObserverRequestParam): ResponseParam {
         val callbackKey = param.data.callbackKey
         pushObservers.remove(callbackKey)?.let {
-            WSPushManager.removePushObserver(param.data.appId, it)
+            ITNetPushManager.removePushObserver(param.data.appId, it)
         }
         return ResponseParam(ResponseCode.SUCCESS)
     }
@@ -189,18 +182,17 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
             }
             return@run list
         }
-        WSPushManager.setAlias(
-            ApplicationUtils.context,
+        ITNetPushManager.setAlias(
             param.data.appId,
             alias2,
-            object : CallbackHandle.Stub() {
-                override fun onSuccess(p0: String?) {
+            object : Callback {
+                override fun onSuccess() {
                     coroutineScope.launch(Dispatchers.Main) {
                         callback(Result.success(ResponseParam(ResponseCode.SUCCESS)))
                     }
                 }
 
-                override fun onFail(appId: String?, code: Int, msg: String?) {
+                override fun onFail(code: Int, msg: String?) {
                     coroutineScope.launch(Dispatchers.Main) {
                         callback(Result.success(ResponseParam(ResponseCode.FAIL, "${code}_${msg}")))
                     }
@@ -210,14 +202,14 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     }
 
     override fun clearAlias(param: RequestParam, callback: (Result<ResponseParam>) -> Unit) {
-        WSPushManager.clearAlias(ApplicationUtils.context, param.data!!["appId"].toString(), object : CallbackHandle.Stub() {
-            override fun onSuccess(p0: String?) {
+        ITNetPushManager.clearAlias(param.data!!["appId"].toString(), object : Callback {
+            override fun onSuccess() {
                 coroutineScope.launch(Dispatchers.Main) {
                     callback(Result.success(ResponseParam(ResponseCode.SUCCESS)))
                 }
             }
 
-            override fun onFail(appId: String?, code: Int, msg: String?) {
+            override fun onFail(code: Int, msg: String?) {
                 coroutineScope.launch(Dispatchers.Main) {
                     callback(Result.success(ResponseParam(ResponseCode.FAIL, "${code}_${msg}")))
                 }
@@ -228,54 +220,52 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun subscribeTopic(param: RequestParam): ResponseParam {
         val topic = param.data?.get("topic")?.toString() ?: ""
         val appId = param.data?.get("appId")?.toString() ?: ""
-        WSPushManager.subscribeTopic(appId, topic)
+        ITNetPushManager.subscribeTopic(appId, topic)
         return ResponseParam(ResponseCode.SUCCESS)
     }
 
     override fun unsubscribeTopic(param: RequestParam): ResponseParam {
         val topic = param.data?.get("topic")?.toString() ?: ""
         val appId = param.data?.get("appId")?.toString() ?: ""
-        WSPushManager.unsubscribeTopic(appId, topic)
+        ITNetPushManager.unsubscribeTopic(appId, topic)
         return ResponseParam(ResponseCode.SUCCESS)
     }
 
 
-    val topicObservers = mutableMapOf<String, ITopicsObserver>()
+    val topicObservers = mutableMapOf<String, TopicsObserver>()
     override fun addTopicsObserver(param: ObserverRequestParam): ResponseParam {
         return try {
             val callbackKey = param.data.callbackKey
             if (!topicObservers.contains(callbackKey)) {
-                val observer = object : ITopicsObserver.Stub() {
+                val observer = object : TopicsObserver {
                     override fun onSubscribe(
-                        appId: String?,
-                        topic: String?,
-                        resultBundle: Bundle?
+                        appId: String,
+                        topic: String,
+                        subscribeResult: SubscribeResult
                     ) {
-                        resultBundle?.let {
-                            val result = SubscribeResult.bundleToBean(resultBundle)?.run {
-                                TopicSubscribeResult(
-                                    status = when (status) {
-                                        TopicStatus.AVAILABLE -> TopicResultStatus.AVAILABLE
-                                        TopicStatus.PROCESSING -> TopicResultStatus.PROCESSING
-                                        TopicStatus.INVALID -> TopicResultStatus.INVALID
-                                        else -> TopicResultStatus.INVALID
-                                    }, code = code.toLong(), msg = msg
-                                )
-                            }
-                            result?.let {
-                                coroutineScope.launch(Dispatchers.Main) {
-                                    flutterPushBridge.onTopicObserverCall(
-                                        TopicObserverCallParam(
-                                            "TopicsObserver_onSubscribe",
-                                            TopicCall(
-                                                callbackKey,
-                                                param.data.appId,
-                                                TopicSubscribeData(topic ?: "", result)
-                                            )
+                        val result = subscribeResult.run {
+                            TopicSubscribeResult(
+                                status = when (status) {
+                                    TopicStatus.AVAILABLE -> TopicResultStatus.AVAILABLE
+                                    TopicStatus.PROCESSING -> TopicResultStatus.PROCESSING
+                                    TopicStatus.INVALID -> TopicResultStatus.INVALID
+                                    else -> TopicResultStatus.INVALID
+                                }, code = code.toLong(), msg = msg
+                            )
+                        }
+                        result.let {
+                            coroutineScope.launch(Dispatchers.Main) {
+                                flutterPushBridge.onTopicObserverCall(
+                                    TopicObserverCallParam(
+                                        "TopicsObserver_onSubscribe",
+                                        TopicCall(
+                                            callbackKey,
+                                            param.data.appId,
+                                            TopicSubscribeData(topic ?: "", result)
                                         )
-                                    ) {
-                                        //do nothing
-                                    }
+                                    )
+                                ) {
+                                    //do nothing
                                 }
                             }
                         }
@@ -283,7 +273,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
 
                 }
                 topicObservers[callbackKey] = observer
-                WSPushManager.addTopicsObserver(param.data.appId, observer)
+                ITNetPushManager.addTopicsObserver(param.data.appId, observer)
             }
             ResponseParam(ResponseCode.SUCCESS)
         } catch (e: Exception) {
@@ -294,7 +284,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
     override fun removeTopicsObserver(param: ObserverRequestParam): ResponseParam {
         val callbackKey = param.data.callbackKey
         topicObservers.remove(callbackKey)?.let {
-            WSPushManager.removeTopicsObserver(param.data.appId, it)
+            ITNetPushManager.removeTopicsObserver(param.data.appId, it)
         }
         return ResponseParam(ResponseCode.SUCCESS)
     }

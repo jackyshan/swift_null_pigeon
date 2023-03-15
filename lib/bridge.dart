@@ -668,9 +668,9 @@ class NativePushBridge {
   ///
   /// 初始化
   ///
-  Future<ResponseParam> init(InitRequestParam arg_param) async {
+  Future<ResponseParam> initPush(InitRequestParam arg_param) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.NativePushBridge.init', codec,
+        'dev.flutter.pigeon.NativePushBridge.initPush', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
         await channel.send(<Object?>[arg_param]) as List<Object?>?;

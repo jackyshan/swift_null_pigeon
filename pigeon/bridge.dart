@@ -68,7 +68,7 @@ abstract class NativePushBridge {
   ///
   /// 初始化
   ///
-  ResponseParam init(InitRequestParam param);
+  ResponseParam initPush(InitRequestParam param);
 
   ///
   /// 连接

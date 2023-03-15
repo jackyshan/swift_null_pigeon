@@ -41,7 +41,7 @@ class PushManager {
   /// 连接
   /// */
   Future<void> _init(PushConfig config) async {
-    await _nativePushBridge.init(InitRequestParam(key: "push_init", data: config));
+    await _nativePushBridge.initPush(InitRequestParam(key: "push_init", data: config));
   }
 
   ///

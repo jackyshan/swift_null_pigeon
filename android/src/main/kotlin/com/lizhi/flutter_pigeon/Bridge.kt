@@ -630,7 +630,7 @@ interface NativePushBridge {
    * 初始化
    *
    */
-  fun init(param: InitRequestParam): ResponseParam
+  fun initPush(param: InitRequestParam): ResponseParam
   /**
    *
    * 连接
@@ -717,14 +717,14 @@ interface NativePushBridge {
     @Suppress("UNCHECKED_CAST")
     fun setUp(binaryMessenger: BinaryMessenger, api: NativePushBridge?) {
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.NativePushBridge.init", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.NativePushBridge.initPush", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val paramArg = args[0] as InitRequestParam
             var wrapped: List<Any?>
             try {
-              wrapped = listOf<Any?>(api.init(paramArg))
+              wrapped = listOf<Any?>(api.initPush(paramArg))
             } catch (exception: Error) {
               wrapped = wrapError(exception)
             }

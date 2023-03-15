@@ -612,7 +612,7 @@ protocol NativePushBridge {
   ///
   /// 初始化
   ///
-  func init(param: InitRequestParam) throws -> ResponseParam
+  func initPush(param: InitRequestParam) throws -> ResponseParam
   ///
   /// 连接
   /// 
@@ -676,20 +676,20 @@ class NativePushBridgeSetup {
     ///
     /// 初始化
     ///
-    let initChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.init", binaryMessenger: binaryMessenger, codec: codec)
+    let initPushChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.initPush", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
-      initChannel.setMessageHandler { message, reply in
+      initPushChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
         let paramArg = args[0] as! InitRequestParam
         do {
-          let result = try api.init(param: paramArg)
+          let result = try api.initPush(param: paramArg)
           reply(wrapResult(result))
         } catch {
           reply(wrapError(error))
         }
       }
     } else {
-      initChannel.setMessageHandler(nil)
+      initPushChannel.setMessageHandler(nil)
     }
     ///
     /// 连接

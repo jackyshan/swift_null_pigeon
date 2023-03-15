@@ -24,7 +24,7 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
 //    var appId = ""
 
     val coroutineScope = GlobalScope
-    override fun init(param: InitRequestParam): ResponseParam {
+    override fun initPush(param: InitRequestParam): ResponseParam {
         //do nothing
         return ResponseParam(ResponseCode.SUCCESS)
     }

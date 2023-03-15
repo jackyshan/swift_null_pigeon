@@ -36,11 +36,19 @@ class PushManager {
   PushBridge createPushBridge(PushConfig config) {
     return PushBridge(config:config, pushManager: this);
   }
+
+  ///
+  /// 连接
+  /// */
+  Future<void> _init(PushConfig config) async {
+    await _nativePushBridge.init(InitRequestParam(key: "push_init", data: config));
+  }
+
   ///
   /// 连接
   /// */
   Future<void> _connect(PushConfig config) async {
-    await _nativePushBridge.connect(InitRequestParam(key: "push_init", data: config));
+    await _nativePushBridge.connect(InitRequestParam(key: "push_connect", data: config));
   }
 
   ///
@@ -182,7 +190,9 @@ class PushManager {
 class PushBridge {
   PushManager pushManager;
   PushConfig config;
-  PushBridge({required this.config, required this.pushManager});
+  PushBridge({required this.config, required this.pushManager}) {
+    pushManager._init(config);
+  }
 
   ///
   /// 连接

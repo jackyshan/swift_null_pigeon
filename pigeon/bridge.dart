@@ -66,6 +66,11 @@ class PushConfig {
 abstract class NativePushBridge {
 
   ///
+  /// 初始化
+  ///
+  ResponseParam init(InitRequestParam param);
+
+  ///
   /// 连接
   /// 
   @async

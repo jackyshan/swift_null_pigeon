@@ -610,6 +610,10 @@ class NativePushBridgeCodec: FlutterStandardMessageCodec {
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol NativePushBridge {
   ///
+  /// 初始化
+  ///
+  func init(param: InitRequestParam) throws -> ResponseParam
+  ///
   /// 连接
   /// 
   func connect(param: InitRequestParam, completion: @escaping (Result<ResponseParam, Error>) -> Void)
@@ -669,6 +673,24 @@ class NativePushBridgeSetup {
   static var codec: FlutterStandardMessageCodec { NativePushBridgeCodec.shared }
   /// Sets up an instance of `NativePushBridge` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: NativePushBridge?) {
+    ///
+    /// 初始化
+    ///
+    let initChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.NativePushBridge.init", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      initChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let paramArg = args[0] as! InitRequestParam
+        do {
+          let result = try api.init(param: paramArg)
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      initChannel.setMessageHandler(nil)
+    }
     ///
     /// 连接
     /// 

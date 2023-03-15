@@ -627,6 +627,12 @@ private object NativePushBridgeCodec : StandardMessageCodec() {
 interface NativePushBridge {
   /**
    *
+   * 初始化
+   *
+   */
+  fun init(param: InitRequestParam): ResponseParam
+  /**
+   *
    * 连接
    * 
    */
@@ -710,6 +716,24 @@ interface NativePushBridge {
     /** Sets up an instance of `NativePushBridge` to handle messages through the `binaryMessenger`. */
     @Suppress("UNCHECKED_CAST")
     fun setUp(binaryMessenger: BinaryMessenger, api: NativePushBridge?) {
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.NativePushBridge.init", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val paramArg = args[0] as InitRequestParam
+            var wrapped: List<Any?>
+            try {
+              wrapped = listOf<Any?>(api.init(paramArg))
+            } catch (exception: Error) {
+              wrapped = wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.NativePushBridge.connect", codec)
         if (api != null) {

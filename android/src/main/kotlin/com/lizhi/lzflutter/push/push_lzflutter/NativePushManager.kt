@@ -24,6 +24,10 @@ class NativePushManager(val flutterPushBridge: FlutterPushBridge) : NativePushBr
 //    var appId = ""
 
     val coroutineScope = GlobalScope
+    override fun init(param: InitRequestParam): ResponseParam {
+        //do nothing
+        return ResponseParam(ResponseCode.SUCCESS)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun connect(param: InitRequestParam, callback: (Result<ResponseParam>) -> Unit) {

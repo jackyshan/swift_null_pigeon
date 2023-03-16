@@ -1,0 +1,162 @@
+PODS:
+  - BaseTool (1.3.5):
+    - BaseTool/Common (= 1.3.5)
+    - BaseTool/Environment (= 1.3.5)
+    - BaseTool/Log (= 1.3.5)
+    - BaseTool/NTP (= 1.3.5)
+    - BaseTool/Tracker (= 1.3.5)
+  - BaseTool/Common (1.3.5):
+    - BaseTool/Log
+  - BaseTool/Environment (1.3.5):
+    - BaseTool/Common
+    - BaseTool/Log
+  - BaseTool/Log (1.3.5)
+  - BaseTool/NTP (1.3.5):
+    - BaseTool/Log
+    - BaseTool/Tracker
+  - BaseTool/Tracker (1.3.5):
+    - BaseTool/Log
+  - CloudConfig (1.0.5):
+    - BaseTool/Environment (~> 1.0)
+    - BaseTool/Log (~> 1.0)
+    - BaseTool/Tracker (~> 1.0)
+  - Flutter (1.0.0)
+  - ITNetLibrary (8.7.0):
+    - ITNetLibrary/lzDefault (= 8.7.0)
+  - ITNetLibrary/_ReqQueue (8.7.0):
+    - ITNetLibrary/Base
+  - ITNetLibrary/Base (8.7.0):
+    - ITNetLibrary/Base/C (= 8.7.0)
+    - ITNetLibrary/Base/Mixture (= 8.7.0)
+    - ITNetLibrary/Base/OC (= 8.7.0)
+    - ITNetLibrary/Base/Swift (= 8.7.0)
+  - ITNetLibrary/Base/C (8.7.0):
+    - ITNetLibrary/ThirdParty/Json11
+  - ITNetLibrary/Base/Mixture (8.7.0):
+    - BaseTool (>= 1.1.6)
+    - CloudConfig
+    - ITNetLibrary/Base/C
+    - ITNetLibrary/Base/OC
+    - ITNetLibrary/Base/Swift
+    - LZDeviceUtil
+    - MMKV
+  - ITNetLibrary/Base/OC (8.7.0):
+    - ITNetLibrary/Base/C
+  - ITNetLibrary/Base/Swift (8.7.0):
+    - ITNetLibrary/Base/OC
+  - ITNetLibrary/DispatchCenter (8.7.0):
+    - ITNetLibrary/Base
+  - ITNetLibrary/DNS (8.7.0):
+    - ITNetLibrary/Base
+  - ITNetLibrary/Frameworks/BoringSSL (8.7.0)
+  - ITNetLibrary/Functions/Resolvers (8.7.0):
+    - ITNetLibrary/Base
+    - ITNetLibrary/DNS
+    - ITNetLibrary/SpeedTest
+  - ITNetLibrary/Functions/SNI (8.7.0):
+    - ITNetLibrary/Base
+    - ITNetLibrary/Functions/Resolvers
+  - ITNetLibrary/Functions/WeakNetwork (8.7.0):
+    - ITNetLibrary/Base
+  - ITNetLibrary/IDL (8.7.0):
+    - ITNetLibrary/Base
+    - ITNetLibrary/DispatchCenter
+    - Mushroom
+    - Starscream
+  - ITNetLibrary/LongLink (8.7.0):
+    - ITNetLibrary/Base
+    - ITNetLibrary/Frameworks/BoringSSL
+    - ITNetLibrary/Functions/SNI
+  - ITNetLibrary/lzDefault (8.7.0):
+    - ITNetLibrary/DispatchCenter
+    - ITNetLibrary/DNS
+    - ITNetLibrary/Functions/SNI
+    - ITNetLibrary/Functions/WeakNetwork
+    - ITNetLibrary/IDL
+    - ITNetLibrary/LongLink
+    - ITNetLibrary/Push
+    - ITNetLibrary/Scene
+    - ITNetLibrary/ShortLink
+    - ITNetLibrary/Upload
+  - ITNetLibrary/Push (8.7.0):
+    - ITNetLibrary/Base
+    - Starscream
+  - ITNetLibrary/Scene (8.7.0):
+    - ITNetLibrary/_ReqQueue
+    - ITNetLibrary/Base
+    - LZThreadManager/Network
+  - ITNetLibrary/ShortLink (8.7.0):
+    - ITNetLibrary/_ReqQueue
+    - ITNetLibrary/Base
+  - ITNetLibrary/SpeedTest (8.7.0):
+    - ITNetLibrary/Base
+  - ITNetLibrary/ThirdParty/Json11 (8.7.0)
+  - ITNetLibrary/Upload (8.7.0):
+    - ITNetLibrary/Base
+  - LZDeviceUtil (0.3.18):
+    - LZNetworkUtil
+  - LZNetworkUtil (0.2.3):
+    - LZNetworkUtil/LizhiReachability (= 0.2.3)
+    - LZNetworkUtil/LZReachability (= 0.2.3)
+    - LZNetworkUtil/LZTraceRoute (= 0.2.3)
+  - LZNetworkUtil/LizhiReachability (0.2.3)
+  - LZNetworkUtil/LZReachability (0.2.3)
+  - LZNetworkUtil/LZTraceRoute (0.2.3)
+  - LZThreadManager/Base (1.2.2)
+  - LZThreadManager/Network (1.2.2):
+    - LZThreadManager/Base
+  - MMKV (1.0.22.2)
+  - Mushroom (1.1.0):
+    - BaseTool (>= 1.1.6)
+    - MushRoomSO (>= 1.1.0)
+  - MushRoomSO (1.1.0):
+    - OpenSSL (= 0.0.1)
+  - OpenSSL (0.0.1)
+  - push_lzflutter (0.0.1):
+    - Flutter
+    - ITNetLibrary (= 8.7.0)
+  - Starscream (4.0.5)
+
+DEPENDENCIES:
+  - BaseTool (= 1.3.5)
+  - Flutter (from `Flutter`)
+  - push_lzflutter (from `.symlinks/plugins/push_lzflutter/ios`)
+
+SPEC REPOS:
+  https://gitlab.lizhi.fm/iOSPods/LizhiSpecs.git:
+    - BaseTool
+    - CloudConfig
+    - ITNetLibrary
+    - LZDeviceUtil
+    - LZNetworkUtil
+    - LZThreadManager
+    - MMKV
+    - Mushroom
+    - MushRoomSO
+    - OpenSSL
+    - Starscream
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  push_lzflutter:
+    :path: ".symlinks/plugins/push_lzflutter/ios"
+
+SPEC CHECKSUMS:
+  BaseTool: c196a17d2f20a42014092e575639d100cb3d37b3
+  CloudConfig: 34bfcb600c06fc2518d0f3f6917438e6edc289b3
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  ITNetLibrary: 22883e6a15d0392cfe91a24d19828361ec4fbb33
+  LZDeviceUtil: d9b81b34b4849f5488e300e2b27854ddd73a6fdc
+  LZNetworkUtil: 4d40bb4d346e44899832b80476f080d4023f8411
+  LZThreadManager: 5a70d7e61319a4ff111ebc5c130a2d614a38ddcb
+  MMKV: b484a1f00e2f9fbd808c04c943d6bc8f90bf3c76
+  Mushroom: 0263926869069ff6f65d4117d0c43f7a02c50694
+  MushRoomSO: b01dfdba04c267e211bcddc2696b38e5f8ae135b
+  OpenSSL: c963bf80b40da61afad9e81cd239609a202fe083
+  push_lzflutter: 195e7123f0a412139a866abc2c5108ed65eca0b3
+  Starscream: 7accb1ef8e2801c89b7d2f4d52445524d686864c
+
+PODFILE CHECKSUM: e4e279da6c9c53f2771eacf736f8885826bf4189
+
+COCOAPODS: 1.12.0

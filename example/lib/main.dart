@@ -30,10 +30,12 @@ class _MyAppState extends State<MyApp> with ConnectStatusObserver, PushObserver,
 
     pushBridge = _pushLzflutterPlugin.getPushManager().createPushBridge(
         PushConfig(
-            hostApp: "saya",
+            hostApp: "sanuya",
             appId: "22631490",
-            deviceId: "N_399daa7b0ccd5d9a",
-            defaultHosts: ['ws://172.17.32.53:39999/push']));
+            deviceId: "ASD",
+            defaultHosts: [
+              'ws://172.17.32.53:39999/push'
+            ]));
     pushBridge.addConnStatusObserver(this);
     pushBridge.addPushObserver(this);
     pushBridge.addTopicsObserver(this);
@@ -94,7 +96,7 @@ class _MyAppState extends State<MyApp> with ConnectStatusObserver, PushObserver,
                     pushBridge.disconnect();
                   }, child: const Text('断开连接')),
                   TextButton(onPressed: () {
-                    pushBridge.setAlias(["123456"]);
+                    pushBridge.setAlias(["5116305868660409516"]);
                   }, child: const Text('设置别名')),
                   TextButton(onPressed: () {
                     pushBridge.clearAlias();
@@ -104,10 +106,10 @@ class _MyAppState extends State<MyApp> with ConnectStatusObserver, PushObserver,
               Row(
                 children: [
                   TextButton(onPressed: () {
-                    pushBridge.subscribeTopic('room_topic_1');
+                    pushBridge.subscribeTopic('LAMP_LIVE_5116305868660409516');
                   }, child: const Text('订阅topic')),
                   TextButton(onPressed: () {
-                    pushBridge.unsubscribeTopic('room_topic_1');
+                    pushBridge.unsubscribeTopic('LAMP_LIVE_5116305868660409516');
                   }, child: const Text('取消订阅topic')),
                 ],
               ),

@@ -114,7 +114,7 @@ PODS:
   - OpenSSL (0.0.1)
   - push_lzflutter (0.0.1):
     - Flutter
-    - ITNetLibrary (= 8.7.0)
+    - ITNetLibrary (~> 8.7.0)
   - Starscream (4.0.5)
 
 DEPENDENCIES:
@@ -154,7 +154,7 @@ SPEC CHECKSUMS:
   Mushroom: 0263926869069ff6f65d4117d0c43f7a02c50694
   MushRoomSO: b01dfdba04c267e211bcddc2696b38e5f8ae135b
   OpenSSL: c963bf80b40da61afad9e81cd239609a202fe083
-  push_lzflutter: 195e7123f0a412139a866abc2c5108ed65eca0b3
+  push_lzflutter: 042933b4e4fdbb2f5e9200f62689ac3126c99bb5
   Starscream: 7accb1ef8e2801c89b7d2f4d52445524d686864c
 
 PODFILE CHECKSUM: e4e279da6c9c53f2771eacf736f8885826bf4189

@@ -58,8 +58,6 @@ public class PushLzflutterPlugin: NSObject, FlutterPlugin, NativePushBridge {
                     connectInfo.connStatus = .connecting
                 case .disConnected:
                     connectInfo.connStatus = .disconnect
-                default:
-                    break
                 }
                 
                 self.flutterRouterApi?.onConnStatusObserverCall(param: ConnStatusObserverCallParam(key: "ConnStatusObserver_onConnStatus", data: ConnStatusCall(callbackKey: callbackKey, appId: param.data.appId, data: connectInfo)), completion: {_ in })
@@ -99,17 +97,23 @@ public class PushLzflutterPlugin: NSObject, FlutterPlugin, NativePushBridge {
                     topic = topiC
                 }
                 
+                var payload = ""
+                if let decodedData = pushData.payload as? Data {
+                    let decodedString = String(data: decodedData, encoding: .utf8)
+                    payload = decodedString ?? ""
+                }
+
                 let transferData = TransferData(
                     seq: pushData.payloadSeq,
                     payloadId: pushData.payloadId,
-                    payload: pushData.payload as? String,
+                    payload: payload,
                     timestamp: Int64(pushData.serverTimestamp ?? 0),
                     deviceId: deviceId,
                     alias: alias,
                     topic: topic
                 )
                 
-                var pushMessageData = PushMessageData(type: pushData.sourceType.name, data: transferData)
+                let pushMessageData = PushMessageData(type: pushData.sourceType.name, data: transferData)
                 
                 self.flutterRouterApi?.onPushObserverCall(param: PushObserverCallParam(key: "PushObserver_onPush", data: PushCall(callbackKey: callbackKey, appId: param.data.appId, data: pushMessageData)), completion: {_ in })
             }

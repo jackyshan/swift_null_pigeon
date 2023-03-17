@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> with ConnectStatusObserver, PushObserver,
 
     pushBridge = _pushLzflutterPlugin.getPushManager().createPushBridge(
         PushConfig(
-            hostApp: "sanuya",
+            hostApp: "",
             appId: "22631490",
             deviceId: "ASD",
             defaultHosts: [

@@ -1,0 +1,14 @@
+stages:
+  - build
+
+
+publish_pub:
+  stage: build
+  only:
+    - tags
+  tags:
+    - group_runner
+  script:
+    - echo "publish----start"
+    - echo y | flutter packages pub publish --server=http://pub.lizhi.fm
+    - echo "publish----end"

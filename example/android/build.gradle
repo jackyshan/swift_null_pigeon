@@ -3,11 +3,34 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        //公司私有服务器
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/repositories/android_uploadpub/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/groups/android_public/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/repositories/releases/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/repositories/snapshots/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
+        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//        classpath "com.lizhi.component.pods:litchi-pods-plugin:1.5.0"
     }
 }
 
@@ -15,6 +38,28 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        //公司私有服务器
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/repositories/android_uploadpub/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/groups/android_public/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/repositories/releases/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'http://maven.lizhi.fm:8081/nexus/content/repositories/snapshots/'
+            allowInsecureProtocol true
+        }
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
+        maven { url 'https://jitpack.io' }
     }
 }
 

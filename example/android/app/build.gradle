@@ -47,7 +47,7 @@ android {
         applicationId "com.lizhi.lzflutter.push.push_lzflutter_example"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -68,4 +68,16 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation("com.lizhi.component.lib:itnet-lthrift-lib:5.4.1@aar")
+    implementation("com.lizhi.component.lib:itnet-config-lib:5.4.1@aar")
+    implementation("com.lizhi.component.lib:itnet-lib:5.4.1@aar")
+    implementation("com.lizhi.component.lib:itnet-http-lib:5.4.1@aar")
+    implementation("com.lizhi.component.lib:itnet-check-lib:5.4.1@aar")
+    implementation 'com.yibasan.lizhifm.sdk.platformtools:lzplatformtools-lib:2.9.17@aar'
+    implementation 'com.yibasan.lizhifm.deviceidentification:deviceidentification-lib:1.4.0@aar'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1@aar'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    implementation 'com.lizhi.component.base:basetool-base:1.4.0@aar'
+    implementation 'com.yibasan.lizhifm.rds:lzrds-lib:2.9.7@aar'
+    implementation "com.yibasan.lizhifm.lizhi-log:lzlogan-lib:3.3.3"
 }

@@ -9,9 +9,9 @@ class MethodChannelPushLzflutter extends PushLzflutterPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('push_lzflutter');
 
-  @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
-  }
+  // @override
+  // Future<String?> getPlatformVersion() async {
+  //   final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+  //   return version;
+  // }
 }

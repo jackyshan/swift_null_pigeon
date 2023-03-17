@@ -2,6 +2,8 @@
 
 A push plugin
 
+https://lizhi2021.feishu.cn/wiki/wikcnoSBejYaNHuLfgsF0Uc3hOb
+
 ## Getting Started
 
 This project is a starting point for a Flutter

@@ -54,8 +54,8 @@ struct RequestParam {
   var data: [String?: Any?]? = nil
 
   static func fromList(_ list: [Any]) -> RequestParam? {
-    let key = list[0] as! String
-    let data = list[1] as! [String?: Any?]? 
+    let key = list[0] as? String
+    let data = list[1] as? [String?: Any?]? 
 
     return RequestParam(
       key: key,

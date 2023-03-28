@@ -78,8 +78,8 @@ struct ResponseParam {
 
   static func fromList(_ list: [Any]) -> ResponseParam? {
     let code = ResponseCode(rawValue: list[0] as! Int)!
-    let message = list[1] as? String
-    let data = list[2] as? [String?: Any?]
+    let message = list[1] as! String? 
+    let data = list[2] as! [String?: Any?]? 
 
     return ResponseParam(
       code: code,
